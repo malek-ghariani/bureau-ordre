@@ -1,0 +1,1 @@
+🟩 11. Archiver un courrier Responsable → CourrierView : cliquer “Archiver” CourrierView → CourrierController : archiverCourrier() CourrierController → CourrierService : verifierEtat() CourrierService → CourrierDAO : updateArchive() CourrierDAO → Database : UPDATE CourrierController → CourrierView : message OK

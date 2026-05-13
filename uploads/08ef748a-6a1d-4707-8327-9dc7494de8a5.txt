@@ -1,0 +1,1 @@
+5. Recevoir le résultat du traitement Responsable → CourrierView : consulter état du courrier CourrierView → CourrierController : getResultat() CourrierController → CourrierService : chargerResultat() CourrierService → CourrierDAO : selectResultat() CourrierDAO → Database : SELECT Database → CourrierDAO : résultat CourrierController → CourrierView : afficher document
