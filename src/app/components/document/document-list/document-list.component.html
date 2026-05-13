@@ -1,0 +1,89 @@
+<h2 class="mt-3 mb-3">
+  Liste des documents
+  <span *ngIf="role === 'RESPONSABLE'"> - {{ type | titlecase }}</span>
+</h2>
+
+<div *ngIf="role === 'RESPONSABLE'" class="btn-group mb-3 d-block">
+  <button class="btn btn-primary" (click)="changeType('entrant')">Courriers Entrants</button>
+  <button class="btn btn-secondary" (click)="changeType('sortant')">Courriers Sortants</button>
+</div>
+
+<div class="mb-3" *ngIf="role === 'RESPONSABLE'">
+  <button class="btn btn-success" (click)="createDocument()">
+    <i class="fas fa-plus"></i> Nouveau Document
+  </button>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-bordered table-hover">
+    <thead class="thead-light">
+  <tr>
+    <th>Numéro ordre</th>
+    <th>Référence</th>
+    <th>Type</th>
+    <th>Statut</th>
+    <th>Date</th>
+    <th>État</th>
+    <th>Priorité</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+    <tbody>
+      <tr *ngFor="let doc of documents">
+
+  <td>{{ doc.numeroOrdre }}</td>
+  <td>{{ doc.reference }}</td>
+  <td>{{ doc.typeDocument }}</td>
+
+  <td>
+    <span class="badge">{{ doc.statut }}</span>
+  </td>
+
+  <td>
+    {{ type === 'entrant' ? doc.dateReception : doc.dateEmission }}
+  </td>
+
+  <td>
+    <span class="badge badge-dark">{{ doc.etat }}</span>
+  </td>
+
+  <td>
+    <span class="badge badge-warning">{{ doc.priorite }}</span>
+  </td>
+
+  <!-- ✅ TOUTES LES ACTIONS ICI -->
+  <td>
+
+    <!-- Voir -->
+    <button class="btn btn-primary btn-sm mr-2 mb-1"
+            (click)="viewDocument(doc)" title="Voir détails">
+      <i class="material-icons">visibility</i>
+    </button>
+
+    <!-- Envoyer -->
+    <button *ngIf="role === 'RESPONSABLE'"
+            class="btn btn-success btn-sm mr-2 mb-1"
+            (click)="openSendModal(doc)">
+      <i class="material-icons">send</i>
+    </button>
+
+    <!-- Modifier -->
+    <button *ngIf="role !== 'ADMIN'"
+            class="btn btn-info btn-sm mr-2 mb-1"
+            (click)="editDocument(doc)">
+      <i class="material-icons">edit</i>
+    </button>
+
+    <!-- Supprimer -->
+    <button *ngIf="role === 'RESPONSABLE'"
+            class="btn btn-danger btn-sm mb-1"
+            (click)="deleteDocument(doc.id!)">
+      <i class="material-icons">delete</i>
+    </button>
+
+  </td>
+
+</tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,39 @@
+<div *ngIf="isAdmin">
+  <h2>Gestion des employés</h2>
+
+  <label>Filtrer par département:</label>
+  <select [(ngModel)]="selectedDepartement" (change)="onDepartementChange()">
+    <option value="">Tous</option>
+    <option *ngFor="let d of departements" [value]="d.code">{{ d.nom }}</option>
+  </select>
+
+  <button routerLink="/admin/employes/new">Ajouter un employé</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Matricule</th>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Poste</th>
+        <th>Département</th>
+        <th>Rôle</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of employes">
+        <td>{{ e.matricule }}</td>
+        <td>{{ e.nom }}</td>
+        <td>{{ e.email }}</td>
+        <td>{{ e.poste }}</td>
+        <td>{{ e.nomDepartement }}</td>
+        <td>{{ e.role }}</td>
+        <td>
+          <button [routerLink]="['/admin/employes', e.id]">Modifier</button>
+          <button (click)="deleteEmploye(e.id!)">Supprimer</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

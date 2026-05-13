@@ -1,0 +1,228 @@
+<div class="modal fade show" [class.d-block]="showModal" *ngIf="showModal">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ isEditMode ? 'Modifier' : 'Créer' }} un document {{ type }}
+        </h5>
+        <button type="button" class="close" (click)="close()">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form #documentForm="ngForm">
+
+          <!-- Dates -->
+          <div class="row" *ngIf="type === 'entrant'">
+            <div class="col-md-6">
+              <label>Date de réception *</label>
+              <input type="date" class="form-control"
+                     [(ngModel)]="currentDocument.dateReception"
+                     name="dateReception" required [max]="today">
+            </div>
+
+            <div class="col-md-6">
+              <label>Type de document *</label>
+              <select class="form-control"
+                      [(ngModel)]="currentDocument.typeDocument"
+                      name="typeDocument" required>
+                <option value="LETTRE">Lettre</option>
+
+<option value="RAPPORT">Rapport</option>
+<option value="NOTE">Note</option>
+<option value="FACTURE">Facture</option>
+<option value="DEMANDE">Demande</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="type === 'sortant'">
+            <div class="col-md-6">
+              <label>Date d'envoi *</label>
+              <input type="date" class="form-control"
+                     [(ngModel)]="currentDocument.dateEmission"
+                     name="dateEnvoi" required [max]="today">
+            </div>
+
+            <div class="col-md-6">
+              <label>Type de document *</label>
+              <select class="form-control"
+                      [(ngModel)]="currentDocument.typeDocument"
+                      name="typeDocument" required>
+                <option value="LETTRE">Lettre</option>
+
+<option value="RAPPORT">Rapport</option>
+<option value="NOTE">Note</option>
+<option value="FACTURE">Facture</option>
+<option value="DEMANDE">Demande</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Référence et Nature -->
+          <div class="row">
+            <div class="col-md-6">
+              <label>Référence *</label>
+              <input type="text" class="form-control" 
+                     [(ngModel)]="currentDocument.reference"
+                     name="reference" required>
+            </div>
+
+            <div class="col-md-6">
+              <label>Nature *</label>
+              <input type="text" class="form-control" 
+                     [(ngModel)]="currentDocument.nature"
+                     name="nature" required>
+            </div>
+          </div>
+
+          <!-- Expéditeur / Destinataire + Mode réception/envoi -->
+<div class="row">
+  <!-- Expéditeur ou Destinataire -->
+  <div class="col-md-6">
+    <label>{{ type === 'entrant' ? 'Expéditeur' : 'Destinataire' }} *</label>
+    <input type="text" class="form-control"
+           [(ngModel)]="type === 'entrant' ? currentDocument.expediteur : currentDocument.destinataire"
+           name="expediteurDestinataire"
+           required
+           [placeholder]="type === 'entrant' ? 'Nom expéditeur' : 'Nom destinataire'">
+  </div>
+
+  <!-- Mode réception / envoi -->
+ <!-- Mode réception (entrant) -->
+<div class="col-md-6" *ngIf="type === 'entrant'">
+  <label>Mode de réception</label>
+  <select class="form-control"
+          [(ngModel)]="currentDocument.modeReception"
+          name="modeReception">
+    <option value="EMAIL">Email</option>
+    <option value="FAX">Fax</option>
+    <option value="MESSAGERIE">Messagerie</option>
+    <option value="LIVRAISON_MAIN_PROPRE">Main propre</option>
+    <option value="PLATEFORME_NUMERIQUE">Plateforme numérique</option>
+    <option value="AUTRE">Autre</option>
+  </select>
+</div>
+
+<!-- Mode d’envoi (sortant) -->
+<div class="col-md-6" *ngIf="type === 'sortant'">
+  <label>Mode d'envoi</label>
+  <select class="form-control"
+          [(ngModel)]="currentDocument.modeExpedition"
+          name="modeExpedition">
+    <option value="EMAIL">Email</option>
+    <option value="FAX">Fax</option>
+    <option value="MESSAGERIE">Messagerie</option>
+    <option value="LIVRAISON_MAIN_PROPRE">Main propre</option>
+    <option value="PLATEFORME_NUMERIQUE">Plateforme numérique</option>
+    <option value="AUTRE">Autre</option>
+  </select>
+</div>
+</div>
+          <!-- Priorité & Statut -->
+          <div class="row">
+            <div class="col-md-6">
+              <label>Priorité</label>
+              <select class="form-control"
+                      [(ngModel)]="currentDocument.priorite"
+                      name="priorite">
+                   <option value="FAIBLE">Faible</option>     
+    <option value="NORMALE">Normale</option>
+    <option value="URGENTE">Urgente</option>
+    <option value="TRES_URGENTE">Très urgente</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label>Statut</label>
+              <select class="form-control"
+                      [(ngModel)]="currentDocument.statut"
+                      name="statut">
+                <option value="NOUVEAU">Nouveau</option>
+                <option value="EN_COURS">En cours</option>
+                <option value="TRAITE">Traité</option>
+                <option value="REJETE">Rejeté</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pièces jointes -->
+          <div class="card mt-3">
+            <div class="card-header">Pièce jointe</div>
+            <div class="card-body">
+
+              <label>Description</label>
+              <textarea class="form-control"
+                        [(ngModel)]="fileDescription"
+                        name="fileDescription"
+                        rows="2"></textarea>
+
+              <label class="mt-3">Sélectionner un fichier</label>
+              <input type="file" class="form-control"
+                     (change)="onFileSelected($event)"  multiple>
+
+              <div *ngIf="selectedFile" class="mt-2">
+                <button class="btn btn-outline-danger btn-sm" (click)="removeFile()">
+                  Supprimer fichier
+                </button>
+              </div>
+
+              <!-- Preview -->
+              <img *ngIf="filePreviewUrl"
+                   [src]="filePreviewUrl"
+                   class="img-thumbnail mt-3" style="max-height:200px">
+
+              <!-- Progress -->
+              <div *ngIf="fileUploadProgress > 0" class="progress mt-3">
+                <div class="progress-bar" [style.width]="fileUploadProgress + '%'">
+                  {{ fileUploadProgress }}%
+                </div>
+              </div>
+
+              <!-- Pièces existantes -->
+            <div *ngIf="isEditMode && pieceJointes.length > 0" class="mt-3">
+  <h6>Pièces jointes existantes :</h6>
+
+  <div class="list-group">
+    <div class="list-group-item d-flex justify-content-between align-items-center"
+         *ngFor="let piece of pieceJointes">
+
+ <button class="btn btn-link p-0" (click)="openPieceJointe(piece)">
+  <i [class]="getFileIcon(piece.nomFichier)"></i> {{ piece.nomFichier }}
+</button>
+
+      <button class="btn btn-danger btn-sm mb-1" 
+        (click)="deletePieceJointe(piece.id)" 
+        title="Supprimer">
+  <i class="material-icons">delete</i>
+</button>
+
+    </div>
+  </div>
+</div>
+
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="close()" [disabled]="isUploading">Annuler</button>
+        <button class="btn btn-primary"
+                (click)="saveDocument()"
+                [disabled]="!documentForm.form.valid || isUploading">
+          <span *ngIf="isUploading">
+            <i class="fas fa-spinner fa-spin"></i> Traitement...
+          </span>
+          <span *ngIf="!isUploading">
+            {{ isEditMode ? 'Modifier' : 'Créer' }}
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

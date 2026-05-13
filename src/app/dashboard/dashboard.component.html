@@ -1,0 +1,69 @@
+<div class="main-content">
+  <div class="container-fluid">
+
+    <!-- Tableau des courriers entrants -->
+    <div class="row">
+      <div class="col-lg-6 col-md-12">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">Courriers Entrants</h4>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table table-hover">
+              <thead class="text-primary">
+                <tr>
+                  <th>ID</th>
+                  <th>Référence</th>
+                  <th>Expéditeur</th>
+                  <th>Statut</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let doc of documentsEntrants">
+                  <td>{{ doc.id }}</td>
+                  <td>{{ doc.reference }}</td>
+                  <td>{{ doc.expediteur }}</td>
+                  <td>{{ doc.statut }}</td>
+                  <td>{{ doc.dateSaisie | date:'shortDate' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau des courriers sortants -->
+      <div class="col-lg-6 col-md-12">
+        <div class="card">
+          <div class="card-header card-header-warning">
+            <h4 class="card-title">Courriers Sortants</h4>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table table-hover">
+              <thead class="text-warning">
+                <tr>
+                  <th>ID</th>
+                  <th>Référence</th>
+                  <th>Destinataire</th>
+                  <th>Statut</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let doc of documentsSortants">
+                  <td>{{ doc.id }}</td>
+                  <td>{{ doc.reference }}</td>
+                  <td>{{ doc.destinataire }}</td>
+                  <td>{{ doc.statut }}</td>
+                  <td>{{ doc.dateSaisie | date:'shortDate' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

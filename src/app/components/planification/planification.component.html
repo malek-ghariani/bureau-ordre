@@ -1,0 +1,28 @@
+<!-- RESPONSABLE -->
+<div *ngIf="role === 'RESPONSABLE'">
+
+  <app-list-planification
+    [planifications]="planifications"
+    (edit)="edit($event)"
+    (delete)="delete($event)">
+  </app-list-planification>
+
+  <app-formulaire-planification
+    [show]="showForm"
+    [data]="selected"
+    (close)="closeForm()"
+    (save)="savePlanification($event)">
+  </app-formulaire-planification>
+
+</div>
+
+<!-- EMPLOYÉ -->
+<div *ngIf="role !== 'RESPONSABLE'">
+
+  <app-list-planification
+    [planifications]="planificationsEmploye"
+    (repondre)="showReponse($event)"
+    (voir)="view($event)">
+  </app-list-planification>
+
+</div>

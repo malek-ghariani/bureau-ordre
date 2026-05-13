@@ -1,0 +1,203 @@
+<div class="container">
+
+  <h2>Liste des planifications</h2>
+
+  <button class="btn btn-primary mb-3" (click)="create()">
+    + Nouvelle planification
+  </button>
+
+  <table class="table table-bordered table-striped" *ngIf="planifications.length > 0">
+
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Envoyé à</th>
+        <th>État</th>
+        <th style="width:220px;">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let p of planifications">
+
+        <td>{{ p.id }}</td>
+
+        <!-- Destinataire -->
+        <td>{{ p.destinataireNom }}</td>
+
+        <!-- État -->
+        <td>
+  <span class="badge bg-primary" *ngIf="p.statut === 'ENVOYE'">Envoyé</span>
+  <span class="badge bg-info" *ngIf="p.statut === 'LU'">Lu</span>
+  <span class="badge bg-warning" *ngIf="p.statut === 'TRAITE'">Traité</span>
+  <span class="badge bg-success" *ngIf="p.statut === 'REPONDU'">Répondu</span>
+</td>
+
+        <!-- Actions -->
+        <td>
+
+          <button class="btn btn-sm btn-info" (click)="view(p)">
+            👁 Voir
+          </button>
+
+          <button class="btn btn-sm btn-success ms-1" (click)="showReponse(p)">
+  Réponse
+</button>
+
+          <button class="btn btn-sm btn-secondary ms-1" (click)="edit(p)">
+            Modifier
+          </button>
+
+          <button class="btn btn-sm btn-danger ms-1" (click)="delete(p.id)">
+  Supprimer
+</button>
+
+        </td>
+
+      </tr>
+    </tbody>
+
+  </table>
+</div>
+
+
+<!-- ================= MODAL VIEW ================= -->
+<div class="modal fade show d-block" *ngIf="showModal"
+     style="background: rgba(0,0,0,0.5);">
+
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">Détails de la planification</h5>
+        <button class="btn-close" (click)="closeModal()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body" *ngIf="selectedPlanification">
+
+        <div class="row">
+
+          <div class="col-md-6">
+
+            <p><strong>ID :</strong> {{ selectedPlanification.id }}</p>
+
+            <p><strong>Envoyé à :</strong> {{ selectedPlanification.destinataireNom }}</p>
+
+            <p><strong>État :</strong>
+              <span class="badge bg-warning" *ngIf="selectedPlanification.statut === 'EN_ATTENTE'">En attente</span>
+              <span class="badge bg-primary" *ngIf="selectedPlanification.statut === 'EN_COURS'">En cours</span>
+              <span class="badge bg-success" *ngIf="selectedPlanification.statut === 'TERMINEE'">Terminée</span>
+            </p>
+
+            <p><strong>Date échéance :</strong>
+              {{ selectedPlanification.dateEcheance | date:'dd/MM/yyyy' }}
+            </p>
+
+          </div>
+
+          <div class="col-md-6">
+
+            <p><strong>Message :</strong></p>
+
+            <div class="border p-2 bg-light">
+              {{ selectedPlanification.message }}
+            </div>
+
+          </div>
+
+        </div>
+
+        <hr>
+
+        <!-- Courrier -->
+        <p><strong>Courrier :</strong>
+          <span *ngIf="selectedPlanification.courrierId; else noCourrier">
+            ID {{ selectedPlanification.courrierId }}
+          </span>
+
+          <ng-template #noCourrier>
+            Aucun courrier associé
+          </ng-template>
+        </p>
+
+        <hr>
+
+        <!-- Pièces jointes -->
+        <p><strong>Pièces jointes :</strong></p>
+
+        <div *ngIf="selectedPlanification.piecesJointesIds?.length > 0; else noFiles">
+          <ul>
+            <li *ngFor="let pj of selectedPlanification.piecesJointesIds">
+              📎 Fichier ID: {{ pj }}
+            </li>
+          </ul>
+        </div>
+
+        <ng-template #noFiles>
+          <span class="text-muted">Aucune pièce jointe</span>
+        </ng-template>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">
+          Fermer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div *ngIf="showReponseModal"
+     class="modal fade show d-block"
+     style="background: rgba(0,0,0,0.5);">
+
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Détails de la réponse</h5>
+        <button class="btn-close" (click)="showReponseModal = false"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <p>
+          <strong>Résultat :</strong>
+          {{ selectedReponse?.resultat || 'Non défini' }}
+        </p>
+
+        <p>
+          <strong>Message :</strong>
+        </p>
+
+        <div class="border p-2 bg-light">
+          {{ selectedReponse?.message || 'Aucun message' }}
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                (click)="showReponseModal = false">
+          Fermer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<app-formulaire-planification
+  [show]="showForm"
+  [isEdit]="isEdit"
+  [form]="form"
+  [employes]="employes"
+  (close)="closeForm()"
+  (save)="savePlanification($event)">
+</app-formulaire-planification>

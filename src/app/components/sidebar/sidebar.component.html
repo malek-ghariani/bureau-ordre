@@ -1,0 +1,15 @@
+<div class="sidebar-wrapper">
+  <ul class="nav">
+
+    <li class="nav-item"
+        *ngFor="let item of menuItems">
+
+      <a class="nav-link"
+         (click)="navigate(item.path)">
+        {{ item.title }}
+      </a>
+
+    </li>
+
+  </ul>
+</div>

@@ -1,0 +1,22 @@
+.layout-container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #252525;
+  color: #fff;
+  padding: 20px;
+}
+
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background: #f4f4f4;
+}

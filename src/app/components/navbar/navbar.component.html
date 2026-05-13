@@ -1,0 +1,21 @@
+<nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-wrapper">
+      <a class="navbar-brand" href="#">{{ pageTitle }}</a>
+    </div>
+
+    <div class="ml-auto d-flex align-items-center">
+
+      <button mat-button color="primary" routerLink="/user-profile">
+        <i class="material-icons">person</i>
+        Profil
+      </button>
+
+      <button mat-button color="warn" (click)="logout()">
+        <i class="material-icons">exit_to_app</i>
+        Déconnexion
+      </button>
+
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,71 @@
+<div class="modal fade show d-block" *ngIf="show"
+     style="background: rgba(0,0,0,0.5);">
+
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5>
+          {{ isEdit ? 'Modifier planification' : 'Nouvelle planification' }}
+        </h5>
+
+        <button class="btn-close" (click)="closeModal()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+      <div class="mb-2">
+  <label>Destinataire *</label>
+
+  <select class="form-control"
+          [(ngModel)]="form.destinataireId"
+          name="destinataireId"
+          required>
+
+    <option value="">Sélectionner un employé</option>
+
+    <option *ngFor="let emp of employes" [value]="emp.id">
+      {{ emp.nom }} ({{ emp.matricule }})
+    </option>
+
+  </select>
+</div>
+
+        <div class="mb-2">
+          <label>Message</label>
+          <textarea class="form-control" [(ngModel)]="form.message"></textarea>
+        </div>
+
+        <div class="mb-2">
+          <label>Date échéance</label>
+          <input type="datetime-local" class="form-control"
+                 [(ngModel)]="form.dateEcheance"
+                 required>
+        </div>
+
+       <div class="mb-2">
+  <label>Pièce jointe</label>
+
+  <input type="file" class="form-control"
+         (change)="onFileSelected($event)">
+</div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">
+          Annuler
+        </button>
+
+        <button class="btn btn-primary" (click)="submit()">
+          Envoyer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

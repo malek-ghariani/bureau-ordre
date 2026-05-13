@@ -1,0 +1,100 @@
+<div class="content">
+  <div class="container-fluid">
+
+  <!-- ================= RESPONSABLE ================= -->
+<div *ngIf="role === 'RESPONSABLE'">
+
+  <!-- Liste des documents -->
+  <app-document-list
+    [documents]="documents"
+    [type]="type"
+    [role]="role"
+    (changeTypeEvent)="changeType($event)"
+    (createDocumentEvent)="openDocumentForm()"
+    (editDocumentEvent)="editDocument($event)"
+    (deleteDocumentEvent)="deleteDocument($event)"
+    (sendDocumentEvent)="openSendModal($event)"
+    (viewDocumentEvent)="onView($event)"
+  ></app-document-list>
+
+  <!-- MODALE DOCUMENT (VIEW) - Placée ICI, à l'intérieur de RESPONSABLE -->
+ <div class="modal fade show"
+     *ngIf="showDetailsModal && selectedDoc"
+     style="display:block; background: rgba(0,0,0,0.5); z-index:1050;">
+
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Détails du document</h5>
+
+        <button type="button" class="close" (click)="closeViewModal()">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <p><b>Numéro d'ordre :</b> {{ selectedDoc?.numeroOrdre }}</p>
+        <p><b>Référence :</b> {{ selectedDoc?.reference }}</p>
+        <p><b>Date saisie :</b> {{ selectedDoc?.dateSaisie | date:'dd/MM/yyyy' }}</p>
+
+        <p *ngIf="type === 'entrant'">
+          <b>Date réception :</b> {{ selectedDoc?.dateReception | date:'dd/MM/yyyy' }}
+        </p>
+
+        <p *ngIf="type === 'sortant'">
+          <b>Date émission :</b> {{ selectedDoc?.dateEmission | date:'dd/MM/yyyy' }}
+        </p>
+
+        <p>
+          <b>Expéditeur :</b> {{ selectedDoc?.expediteur?.nom || '—' }}
+        </p>
+
+        <p>
+          <b>Mode :</b>
+          {{ type === 'entrant' ? selectedDoc?.modeReception : selectedDoc?.modeExpedition }}
+        </p>
+
+        <p>
+          <b>Priorité :</b>
+          <span class="badge badge-warning">{{ selectedDoc?.priorite }}</span>
+        </p>
+
+        <p>
+          <b>État :</b>
+          <span class="badge badge-dark">{{ selectedDoc?.etat }}</span>
+        </p>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeViewModal()">
+          Fermer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+    <!-- Form document -->
+    <app-document-form 
+      [showModal]="showDocumentForm" 
+      [currentDocument]="currentDocument" 
+      [type]="type"
+      (closeForm)="closeDocumentForm()" 
+      (savedDocument)="onDocumentSaved($event)">
+    </app-document-form>
+    
+    <!-- Envoi -->
+    <app-send-courrier
+      [document]="selectedDocument" 
+      [employes]="employes" 
+      [showSendModal]="showSendModal"
+      (close)="closeSendModal()" 
+      (send)="envoyerCourrier($event)">
+    </app-send-courrier>
+
+  </div>
+</div>
