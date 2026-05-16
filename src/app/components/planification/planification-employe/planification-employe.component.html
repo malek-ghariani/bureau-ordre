@@ -1,67 +1,156 @@
 <div class="card shadow-sm">
-
   <div class="card-header bg-primary text-white">
     <h3 class="mb-0">📋 Mes planifications</h3>
   </div>
 
   <div class="card-body p-0">
-
     <div class="table-responsive">
-
       <table class="table table-bordered table-hover mb-0">
-
         <thead class="thead-light">
           <tr>
-            <th>Message</th>
+            <th>Courrier</th>
             <th>Date échéance</th>
             <th>Statut</th>
+            <th>Résultat</th>
             <th style="width: 180px;">Actions</th>
           </tr>
         </thead>
-
         <tbody>
-
           <tr *ngFor="let p of planifications">
 
-            <td>{{ p.message }}</td>
+            <td>
+              <span *ngIf="p.courrierEntrantId">Entrant #{{ p.courrierEntrantId }}</span>
+              <span *ngIf="p.courrierSortantId">Sortant #{{ p.courrierSortantId }}</span>
+              <span *ngIf="!p.courrierEntrantId && !p.courrierSortantId" class="text-muted">—</span>
+            </td>
 
             <td>{{ p.dateEcheance | date:'short' }}</td>
 
             <td>
-              <span class="badge badge-info">
+              <span class="badge"
+                    [ngClass]="{
+                      'badge-warning': p.statut === 'EN_ATTENTE',
+                      'badge-success': p.statut === 'TERMINE',
+                      'badge-info':    p.statut === 'EN_COURS',
+                      'badge-danger':  p.statut === 'A_REFAIRE'
+                    }">
                 {{ p.statut }}
               </span>
             </td>
 
             <td>
+              <span *ngIf="p.resultat" class="badge badge-secondary">{{ p.resultat }}</span>
+              <span *ngIf="!p.resultat" class="text-muted">—</span>
+            </td>
 
+            <td>
               <button class="btn btn-sm btn-success mr-2"
+                      [disabled]="p.statut === 'TERMINE'"
                       (click)="repondre(p)">
                 ✉ Répondre
               </button>
-
               <button class="btn btn-sm btn-primary"
                       (click)="ouvrirDetails(p)">
                 👁 Voir
               </button>
-
             </td>
 
           </tr>
 
+          <tr *ngIf="planifications.length === 0">
+            <td colspan="5" class="text-center text-muted py-4">Aucune planification reçue.</td>
+          </tr>
         </tbody>
-
       </table>
-
     </div>
-
   </div>
 </div>
 
 
-<!-- Modal -->
-<div class="modal fade show" [class.d-block]="showReponseModal" *ngIf="showReponseModal">
+<!-- ===================== MODAL DÉTAILS ===================== -->
+<div class="modal fade show" [class.d-block]="showDetailsModal" *ngIf="showDetailsModal">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
 
+      <div class="modal-header">
+        <h5 class="modal-title">Détails de la planification</h5>
+        <button type="button" class="close" (click)="fermerDetails()">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedPlanification">
+
+        <!-- Message du responsable -->
+        <div class="alert alert-info">
+          <strong>Message du responsable :</strong>
+          <p class="mb-0 mt-1">{{ selectedPlanification.transmissionMessage || '—' }}</p>
+        </div>
+
+        <!-- Infos générales -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="font-weight-bold">Date d'échéance</label>
+            <p>{{ selectedPlanification.dateEcheance | date:'medium' }}</p>
+          </div>
+          <div class="col-md-6">
+            <label class="font-weight-bold">Statut</label>
+            <p>
+              <span class="badge badge-info">{{ selectedPlanification.statut }}</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="row mb-3" *ngIf="selectedPlanification.resultat">
+          <div class="col-md-6">
+            <label class="font-weight-bold">Résultat</label>
+            <p>{{ selectedPlanification.resultat }}</p>
+          </div>
+        </div>
+
+        <!-- Réponse de l'employé si déjà répondu -->
+        <div class="alert alert-success" *ngIf="selectedPlanification.reponseMessage">
+          <strong>Votre réponse :</strong>
+          <p class="mb-0 mt-1">{{ selectedPlanification.reponseMessage }}</p>
+        </div>
+
+        <!-- Pièces jointes -->
+        <div *ngIf="selectedPlanification.piecesJointesNoms?.length > 0">
+          <label class="font-weight-bold">Pièces jointes :</label>
+          <ul class="list-group mt-1">
+            <li class="list-group-item d-flex justify-content-between align-items-center"
+                *ngFor="let nom of selectedPlanification.piecesJointesNoms; let i = index">
+              <span>📎 {{ nom }}</span>
+              <button class="btn btn-sm btn-outline-primary"
+                      (click)="telechargerPieceJointe(selectedPlanification.piecesJointesIds[i], nom)">
+                ⬇ Télécharger
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <p *ngIf="!selectedPlanification.piecesJointesNoms?.length" class="text-muted mt-2">
+          Aucune pièce jointe.
+        </p>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerDetails()">Fermer</button>
+        <button class="btn btn-success"
+                *ngIf="selectedPlanification?.statut !== 'TERMINE'"
+                (click)="fermerDetails(); repondre(selectedPlanification)">
+          ✉ Répondre
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== MODAL RÉPONSE ===================== -->
+<div class="modal fade show" [class.d-block]="showReponseModal" *ngIf="showReponseModal">
   <div class="modal-dialog modal-dialog-scrollable modal-lg">
     <div class="modal-content">
 
@@ -74,47 +163,39 @@
 
       <div class="modal-body">
 
-        <form #reponseForm="ngForm">
+        <!-- Rappel du message du responsable -->
+        <div class="alert alert-info mb-3" *ngIf="selectedPlanification?.transmissionMessage || selectedPlanification?.message">
+          <strong>Instruction :</strong>
+          <p class="mb-0 mt-1">{{ selectedPlanification.transmissionMessage || '—' }}</p>
+        </div>
 
+        <form #reponseForm="ngForm">
           <div class="form-group">
             <label>Résultat *</label>
-
             <select class="form-control"
                     [(ngModel)]="formReponse.resultat"
-                    name="resultat"
-                    required>
-
+                    name="resultat" required>
               <option value="">-- Choisir --</option>
-
-              <option *ngFor="let r of resultatsOptions"
-                      [value]="r.value">
-                {{ r.label }}
-              </option>
-
+              <option *ngFor="let r of resultatsOptions" [value]="r.value">{{ r.label }}</option>
             </select>
           </div>
 
           <div class="form-group mt-3">
-            <label>Réponse *</label>
-
+            <label>Votre réponse *</label>
             <textarea class="form-control"
                       rows="4"
                       [(ngModel)]="formReponse.message"
-                      name="message"
-                      required>
+                      name="message" required>
             </textarea>
           </div>
-
         </form>
 
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="fermerReponse()">
-          Annuler
-        </button>
-
+        <button class="btn btn-secondary" (click)="fermerReponse()">Annuler</button>
         <button class="btn btn-primary"
+                [disabled]="!formReponse.resultat || !formReponse.message"
                 (click)="envoyerReponse()">
           Envoyer
         </button>
@@ -122,5 +203,10 @@
 
     </div>
   </div>
+</div>
 
+<!-- Overlay -->
+<div class="modal-backdrop fade show"
+     *ngIf="showDetailsModal || showReponseModal"
+     (click)="fermerDetails(); fermerReponse()">
 </div>

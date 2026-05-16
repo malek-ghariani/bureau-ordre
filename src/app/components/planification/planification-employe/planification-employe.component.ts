@@ -9,22 +9,17 @@ import { AuthService } from 'app/services/auth.service';
 export class PlanificationEmployeComponent implements OnInit {
 
   planifications: any[] = [];
-
   showReponseModal = false;
   showDetailsModal = false;
-
   selectedPlanification: any = null;
 
-  formReponse = {
-    resultat: '',
-     message: ''
-  };
+  formReponse = { resultat: '', message: '' };
 
   resultatsOptions = [
-    { value: "TERMINE", label: "Terminé" },
-    { value: "TERMINE_ET_PLANIFIER", label: "Terminé et planifier le prochain" },
-    { value: "MARQUE_COMME_LU", label: "Marqué comme lu" },
-    { value: "A_REFAIRE", label: "À refaire" }
+    { value: 'TERMINE',               label: 'Terminé' },
+    { value: 'TERMINE_ET_PLANIFIER',  label: 'Terminé et planifier le prochain' },
+    { value: 'MARQUE_COMME_LU',       label: 'Marqué comme lu' },
+    { value: 'A_REFAIRE',             label: 'À refaire' }
   ];
 
   constructor(
@@ -33,45 +28,37 @@ export class PlanificationEmployeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = this.auth.getId();
-    this.load(id);
-    console.log("COMPONENT CHARGÉ");
+    this.load(this.auth.getId());
   }
 
   load(id: number) {
     this.service.getByDestinataire(id).subscribe({
-      next: (data) => {
-        this.planifications = data;
-      },
+      next: (data) => this.planifications = data,
       error: (err) => console.error(err)
     });
   }
 
-  // ================= VIEW =================
+  // ================= DÉTAILS =================
   ouvrirDetails(p: any) {
     this.selectedPlanification = p;
     this.showDetailsModal = true;
-    document.body.classList.remove('modal-open');
   }
 
   fermerDetails() {
     this.showDetailsModal = false;
     this.selectedPlanification = null;
-    document.body.classList.remove('modal-open');
   }
 
-  // ================= REPONSE =================
+  // ================= RÉPONSE =================
   repondre(p: any) {
     this.selectedPlanification = p;
     this.showReponseModal = true;
-    document.body.classList.remove('modal-open');
   }
 
   fermerReponse() {
     this.showReponseModal = false;
-    this.formReponse = { resultat: '',  message:  '' };
+    this.formReponse = { resultat: '', message: '' };
     this.selectedPlanification = null;
-    document.body.classList.remove('modal-open');
   }
 
   envoyerReponse() {
@@ -89,6 +76,19 @@ export class PlanificationEmployeComponent implements OnInit {
       error: (err) => console.error(err)
     });
   }
- 
 
+  // ================= PIÈCES JOINTES =================
+  telechargerPieceJointe(id: number, nom: string) {
+    this.service.telechargerPieceJointe(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nom;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Erreur téléchargement', err)
+    });
+  }
 }

@@ -189,5 +189,10 @@ closeViewModal() {
 
   document.body.classList.remove('modal-open');
 }
+onTransmissionEnvoyee() {
+  this.closeSendModal();
+  this.loadTransmissions();
+  alert('Courrier envoyé avec succès !');
+}
 
 }

@@ -102,7 +102,7 @@
             <p><strong>Message :</strong></p>
 
             <div class="border p-2 bg-light">
-              {{ selectedPlanification.message }}
+              {{ selectedPlanification.transmissionMessage || '—' }}
             </div>
 
           </div>
@@ -129,9 +129,9 @@
 
         <div *ngIf="selectedPlanification.piecesJointesIds?.length > 0; else noFiles">
           <ul>
-            <li *ngFor="let pj of selectedPlanification.piecesJointesIds">
-              📎 Fichier ID: {{ pj }}
-            </li>
+            <li *ngFor="let nom of selectedPlanification.piecesJointesNoms; let i = index">
+      📎 {{ nom }}
+    </li>
           </ul>
         </div>
 
@@ -152,7 +152,7 @@
   </div>
 
 </div>
-
+<!--reponse employé-->
 <div *ngIf="showReponseModal"
      class="modal fade show d-block"
      style="background: rgba(0,0,0,0.5);">

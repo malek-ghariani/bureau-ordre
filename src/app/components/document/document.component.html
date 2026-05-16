@@ -88,13 +88,13 @@
     </app-document-form>
     
     <!-- Envoi -->
-    <app-send-courrier
-      [document]="selectedDocument" 
-      [employes]="employes" 
-      [showSendModal]="showSendModal"
-      (close)="closeSendModal()" 
-      (send)="envoyerCourrier($event)">
-    </app-send-courrier>
+ <app-send-courrier
+  [showSendModal]="showSendModal"
+  [document]="selectedDocument"
+  [employes]="employes"
+  (close)="showSendModal = false"
+  (sent)="onTransmissionEnvoyee()">   <!-- ✅ plus de logique d'envoi dans le parent -->
+</app-send-courrier>
 
   </div>
 </div>

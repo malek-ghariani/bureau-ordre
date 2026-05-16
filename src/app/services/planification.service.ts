@@ -47,4 +47,11 @@ export class PlanificationService {
     const body = { resultat, message };
     return this.http.put(`${API}/${id}/repondre`, body);
   }
+  // L'URL pointe vers PieceJointeController, pas PlanificationController
+telechargerPieceJointe(id: number): Observable<Blob> {
+  return this.http.get(`http://localhost:8080/api/pieces-jointes/download/${id}`, {
+    responseType: 'blob',
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  });
+}
 }
