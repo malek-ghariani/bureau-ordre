@@ -47,6 +47,7 @@ public class PieceJointe {
     
     @ManyToOne
     @JoinColumn(name = "planification_id", nullable = true)
+    @JsonIgnore // ✅ ajouter
     private Planification planification;
 
     @ManyToOne

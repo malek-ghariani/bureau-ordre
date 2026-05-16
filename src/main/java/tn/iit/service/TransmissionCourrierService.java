@@ -74,7 +74,7 @@ public class TransmissionCourrierService {
         TransmissionCourrier saved = repo.save(t);
 
         // ✔ créer planification automatiquement
-        planificationService.creerDepuisTransmission(saved);
+        planificationService.creerDepuisTransmission(saved, request.getDateEcheance());
 
         return saved;
     }
@@ -96,7 +96,7 @@ public class TransmissionCourrierService {
 
         TransmissionCourrier saved = repo.save(t);
 
-        planificationService.creerDepuisTransmission(saved);
+        planificationService.creerDepuisTransmission(saved, request.getDateEcheance());
 
         return saved;
     }

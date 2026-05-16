@@ -56,6 +56,7 @@ public class PlanificationMapper {
         // =========================
         if (p.getTransmission() != null) {
             dto.setTransmissionId(p.getTransmission().getId());
+            dto.setTransmissionMessage(p.getTransmission().getMessage()); 
         }
 
         // =========================

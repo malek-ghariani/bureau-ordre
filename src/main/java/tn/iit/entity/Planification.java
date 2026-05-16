@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -69,8 +70,7 @@ public class Planification {
     // =========================
     // PIÈCES JOINTES
     // =========================
-    @OneToMany
-    @JoinColumn(name = "planification_id")
+    @OneToMany(mappedBy = "planification", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PieceJointe> piecesJointes = new ArrayList<>();
     
     @ManyToOne

@@ -1,14 +1,19 @@
 package tn.iit.service;
 
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import tn.iit.dto.PlanificationDTO;
 import tn.iit.dto.ResponsePlanificationDTO;
+import tn.iit.entity.CourrierEntrant;
+import tn.iit.entity.CourrierSortant;
 import tn.iit.entity.PieceJointe;
 import tn.iit.entity.Planification;
 import tn.iit.entity.ResultatTraitement;
@@ -178,39 +183,60 @@ public class PlanificationService {
     // =========================
     //        DELETE
     // =========================
+    @Transactional
     public void delete(Long id) {
-        planificationRepository.deleteById(id);
+        Planification p = planificationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Planification introuvable"));
+        p.getPiecesJointes().clear();
+        planificationRepository.delete(p);
     }
-
 
 
     // =========================
     //  CRÉER PLANIFICATION DEPUIS TRANSMISSION
     // =========================
-    public void creerDepuisTransmission(TransmissionCourrier t) {
-
+    @Transactional
+    public void creerDepuisTransmission(TransmissionCourrier t, LocalDateTime dateEcheance) {
         Planification p = new Planification();
-
         p.setTypeSource(TypeSourcePlanification.COURRIER);
-        p.setMessage(t.getMessage());
-
-        // ⚠ TransmissionCourrier n'a PAS dateEcheance → enlever !
-        p.setDateEcheance(null);
-
+        p.setDateEcheance(dateEcheance);
         p.setStatut(StatutPlanification.ENVOYE);
+        p.setDestinataire(t.getDestinataire());
+        p.setTransmission(t);
 
-        // courrier
-        if (t.getCourrierEntrant() != null)
+        if (t.getCourrierEntrant() != null) {
             p.setCourrierEntrant(t.getCourrierEntrant());
 
-        if (t.getCourrierSortant() != null)
+            CourrierEntrant ce = courrierEntrantRepository.findById(t.getCourrierEntrant().getId())
+                    .orElseThrow(() -> new RuntimeException("Courrier entrant introuvable"));
+
+            List<PieceJointe> pjs = ce.getPiecesJointes();
+            System.out.println(">>> pièces jointes courrier entrant : " + pjs.size());
+
+            if (pjs != null && !pjs.isEmpty()) {
+                for (PieceJointe pj : pjs) {
+                    pj.setPlanification(p);
+                }
+                p.setPiecesJointes(new ArrayList<>(pjs));
+            }
+        }
+
+        if (t.getCourrierSortant() != null) {
             p.setCourrierSortant(t.getCourrierSortant());
 
-        // destinataire
-        p.setDestinataire(t.getDestinataire());
+            CourrierSortant cs = courrierSortantRepository.findById(t.getCourrierSortant().getId())
+                    .orElseThrow(() -> new RuntimeException("Courrier sortant introuvable"));
 
-        // rattacher transmission
-        p.setTransmission(t);
+            List<PieceJointe> pjs = cs.getPiecesJointes();
+            System.out.println(">>> pièces jointes courrier sortant : " + pjs.size());
+
+            if (pjs != null && !pjs.isEmpty()) {
+                for (PieceJointe pj : pjs) {
+                    pj.setPlanification(p);
+                }
+                p.setPiecesJointes(new ArrayList<>(pjs));
+            }
+        }
 
         planificationRepository.save(p);
     }
@@ -238,11 +264,9 @@ public class PlanificationService {
                 .orElseThrow(() -> new RuntimeException("Planification introuvable"));
     }
     public List<PlanificationDTO> findByDestinataire(Long id) {
-
         List<Planification> list = planificationRepository.findByDestinataireId(id);
-
         return list.stream()
-                .map(this::toDTO)
+                .map(PlanificationMapper::toDTO)  // ✅ utilise le vrai mapper
                 .collect(Collectors.toList());
     }
 

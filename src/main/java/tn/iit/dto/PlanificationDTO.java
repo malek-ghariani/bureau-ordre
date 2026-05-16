@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +21,7 @@ public class PlanificationDTO {
 
     // 👇 contenu
     private String message;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dateEcheance;
 
     // 🟦 statut de traitement (EN_ATTENTE, TERMINE, etc.)
@@ -32,6 +35,7 @@ public class PlanificationDTO {
     // 👇 courrier optionnel
     private Long courrierEntrantId;
     private Long courrierSortantId;
+    private String transmissionMessage;
 
     // 👇 transmission d’origine
     private Long transmissionId;

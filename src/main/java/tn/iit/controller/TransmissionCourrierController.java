@@ -41,6 +41,8 @@ public class TransmissionCourrierController {
             @RequestBody TransmissionRequest request,
             Authentication auth) {
 
+        System.out.println(">>> REQUEST COMPLET : " + request);
+        System.out.println(">>> dateEcheance : " + request.getDateEcheance());
         Employe expediteur = employeRepo.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Expéditeur introuvable"));
 

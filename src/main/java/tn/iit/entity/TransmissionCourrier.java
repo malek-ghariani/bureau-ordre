@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
@@ -48,8 +49,9 @@ public class TransmissionCourrier {
     
     private LocalDateTime dateEnvoi;
     private LocalDateTime dateLecture;
-    @OneToOne(mappedBy = "transmission")
-    private Planification planification;
+    @OneToMany(mappedBy = "transmission")
+    @JsonIgnore
+    private List<Planification> planifications = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
