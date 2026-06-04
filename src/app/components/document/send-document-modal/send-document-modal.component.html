@@ -13,8 +13,8 @@
           <div class="form-group">
             <label>Destinataire *</label>
             <select class="form-control" [(ngModel)]="selectedEmployeId" name="employeId" required>
-              <option value="">Sélectionnez un employé</option>
-              <option *ngFor="let emp of employes" [value]="emp.id">
+              <option [ngValue]="null">Sélectionnez un employé</option>
+              <option *ngFor="let emp of employes" [ngValue]="emp.id">
                 {{ emp.nom }} ({{ emp.matricule }})
               </option>
               <option *ngIf="!employes || employes.length === 0" disabled>Chargement...</option>
@@ -29,10 +29,7 @@
          required>
 </div>
 
-          <div class="form-group">
-            <label>Objet *</label>
-            <input type="text" class="form-control" [(ngModel)]="courrierObjet" name="objet" required>
-          </div>
+          
 
           <div class="form-group">
             <label>Message *</label>
@@ -43,7 +40,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeSendModal()">Annuler</button>
         <button type="button" class="btn btn-primary"
-                [disabled]="!selectedEmployeId || !courrierObjet || !courrierMessage"
+                [disabled]="!selectedEmployeId || !courrierMessage || !dateEcheance"
                 (click)="envoyerCourrier()">
           Envoyer
         </button>

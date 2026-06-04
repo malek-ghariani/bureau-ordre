@@ -11,12 +11,13 @@ export class SendDocumentModalComponent implements OnInit, OnChanges {
   @Input() showSendModal = false;
   @Input() document: Document | null = null;
   @Input() employes: any[] = [];
+  @Input() type: 'entrant' | 'sortant' = 'entrant'; 
 
   @Output() close = new EventEmitter<void>();
   @Output() sent = new EventEmitter<void>(); // ✅ notifie le parent que c'est envoyé
 
   selectedEmployeId!: number;
-  courrierObjet = '';
+  
   courrierMessage = '';
   dateEcheance: string = '';
   loading = false;
@@ -36,7 +37,7 @@ export class SendDocumentModalComponent implements OnInit, OnChanges {
   }
 
   envoyerCourrier() {
-    if (!this.selectedEmployeId || !this.courrierObjet || !this.courrierMessage || !this.dateEcheance)
+    if (!this.selectedEmployeId  || !this.courrierMessage || !this.dateEcheance)
       return;
 
     this.loading = true;
@@ -44,11 +45,11 @@ export class SendDocumentModalComponent implements OnInit, OnChanges {
 
     const payload = {
       destinataireId: this.selectedEmployeId,
-      objet: this.courrierObjet,
+      
       message: this.courrierMessage,          // ✅ message du responsable → TransmissionCourrier.message
       dateEcheance: this.dateEcheance,
       courrierId: this.document?.id ?? null,
-      type: this.document ? 'ENTRANT' : null
+      type: this.type.toUpperCase()
     };
 
     this.transmissionService.envoyer(payload).subscribe({
@@ -67,7 +68,7 @@ export class SendDocumentModalComponent implements OnInit, OnChanges {
 
   private resetForm() {
     this.selectedEmployeId = undefined!;
-    this.courrierObjet = '';
+   
     this.courrierMessage = '';
     this.dateEcheance = '';
     this.errorMessage = '';

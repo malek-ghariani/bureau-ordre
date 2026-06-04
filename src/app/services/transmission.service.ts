@@ -4,44 +4,29 @@ import { Observable } from 'rxjs';
 import { Transmission } from '../models/transmission.model';
 import { ApiResponse } from '../models/ApiResponse.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class TransmissionService {
-
   private api = 'http://localhost:8080/api/transmissions';
 
   constructor(private http: HttpClient) {}
 
-  envoyer(data: any): Observable<ApiResponse<Transmission>> {
-    return this.http.post<ApiResponse<Transmission>>(`${this.api}/envoyer`, data);
+  envoyer(data: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.api}/envoyer`, data);
   }
 
-  getRecus(): Observable<ApiResponse<Transmission[]>> {
-    return this.http.get<ApiResponse<Transmission[]>>(`${this.api}/recus`);
+  getRecus(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.api}/recus`);
   }
 
-  getEnvoyes(): Observable<ApiResponse<Transmission[]>> {
-    return this.http.get<ApiResponse<Transmission[]>>(`${this.api}/envoyes`);
+  marquerLu(id: number): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.api}/${id}/lu`, {});
   }
 
-  marquerLu(id: number): Observable<ApiResponse<Transmission>> {
-    return this.http.put<ApiResponse<Transmission>>(`${this.api}/${id}/lu`, {});
+  getByCourrierEntrant(id: number): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.api}/by-courrier-entrant/${id}`);
   }
 
-  repondre(id: number, resultat: string, reponse: string): Observable<ApiResponse<Transmission>> {
-    const params = new HttpParams()
-      .set('resultat', resultat)
-      .set('reponse', reponse);
-
-    return this.http.put<ApiResponse<Transmission>>(`${this.api}/${id}/repondre`, null, { params });
-  }
-
-  getByCourrierEntrant(id: number): Observable<ApiResponse<Transmission[]>> {
-    return this.http.get<ApiResponse<Transmission[]>>(`${this.api}/by-courrier-entrant/${id}`);
-  }
-
-  getByCourrierSortant(id: number): Observable<ApiResponse<Transmission[]>> {
-    return this.http.get<ApiResponse<Transmission[]>>(`${this.api}/by-courrier-sortant/${id}`);
+  getByCourrierSortant(id: number): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.api}/by-courrier-sortant/${id}`);
   }
 }

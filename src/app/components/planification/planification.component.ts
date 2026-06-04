@@ -25,21 +25,15 @@ export class PlanificationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.role = this.auth.getRole()!;
-
-    if (this.role === 'RESPONSABLE') {
-      this.loadAllPlanifications();
-    } else {
-      this.idEmploye = Number(localStorage.getItem('id'));
-      this.loadMyPlanifications();
-    }
-  }
+  this.role = this.auth.getRole()!;
+  
+}
 
   // RESPONSABLE
   loadAllPlanifications(): void {
     this.planificationService.getAll().subscribe({
       next: (res) => {
-        this.planifications = res;
+        this.planifications = res ?? [];
       },
       error: (err) => console.error(err)
     });
@@ -47,15 +41,11 @@ export class PlanificationComponent implements OnInit {
 
   // EMPLOYÉ
   loadMyPlanifications(): void {
-
-    const id = Number(localStorage.getItem('id'));
-
-    this.planificationService.getByDestinataire(id).subscribe({
-      next: (data) => {
-        console.log("DATA PLANIFICATIONS =", data);
-        this.planificationsEmploye = data;
-      },
-      error: (err) => console.error(err)
-    });
-  }
+  this.planificationService.getMesPlanifications().subscribe({  
+    next: (res) => {
+      this.planificationsEmploye = res ?? [];  
+    },
+    error: (err: any) => console.error(err)
+  });
+}
 }

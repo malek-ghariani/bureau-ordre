@@ -6,13 +6,14 @@ import { ResponsableDashboardComponent } from './responsable-dashboard/responsab
 import { MaterialModule } from '../../material.module';
 import { SharedModule } from '../../shared/shared.module';
 import { RouterModule } from '@angular/router';
-
+import { ArchivesComponent } from 'app/components/archives/archives.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     ResponsableLayoutComponent,
     ResponsableDashboardComponent,
-    
+    ArchivesComponent,
     
   ],
   imports: [
@@ -20,7 +21,8 @@ import { RouterModule } from '@angular/router';
     ResponsableLayoutRoutingModule,
     MaterialModule,
     SharedModule,
-    RouterModule
+    RouterModule,
+    FormsModule 
   ]
 })
 export class ResponsableLayoutModule {}

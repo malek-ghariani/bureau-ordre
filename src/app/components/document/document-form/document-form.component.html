@@ -81,14 +81,117 @@
           <!-- Expéditeur / Destinataire + Mode réception/envoi -->
 <div class="row">
   <!-- Expéditeur ou Destinataire -->
-  <div class="col-md-6">
-    <label>{{ type === 'entrant' ? 'Expéditeur' : 'Destinataire' }} *</label>
-    <input type="text" class="form-control"
-           [(ngModel)]="type === 'entrant' ? currentDocument.expediteur : currentDocument.destinataire"
-           name="expediteurDestinataire"
-           required
-           [placeholder]="type === 'entrant' ? 'Nom expéditeur' : 'Nom destinataire'">
+  <!-- Expéditeur (entrant) -->
+<div class="col-md-6" *ngIf="type === 'entrant'">
+  <label>Expéditeur *</label>
+  <div class="input-group">
+    <select class="form-control"
+            [(ngModel)]="currentDocument.expediteurId"
+            name="expediteurId"
+            required>
+      <option [ngValue]="null">Sélectionner un expéditeur</option>
+      <option *ngFor="let t of tiers" [ngValue]="t.id">{{ t.nom }}</option>
+    </select>
+    <div class="input-group-append">
+      <button type="button" class="btn btn-outline-primary" 
+              (click)="toggleNewTiersForm()"
+              title="Ajouter un tiers">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
   </div>
+
+  <!-- Mini-formulaire inline -->
+  <div *ngIf="showNewTiersForm" class="card mt-2 p-3">
+    <h6>Nouveau tiers</h6>
+    <input type="text" class="form-control mb-2" 
+           placeholder="Nom *"
+           [(ngModel)]="newTiers.nom" 
+           name="newTiersNom">
+    <input type="text" class="form-control mb-2" 
+           placeholder="Email"
+           [(ngModel)]="newTiers.email" 
+           name="newTiersEmail">
+    <input type="text" class="form-control mb-2" 
+           placeholder="Téléphone"
+           [(ngModel)]="newTiers.telephone" 
+           name="newTiersTelephone">
+    <select class="form-control mb-2"
+            [(ngModel)]="newTiers.type"
+            name="newTiersType">
+      <option value="PERSONNE_PHYSIQUE">Personne physique</option>
+      <option value="PERSONNE_MORALE">Personne morale</option>
+      <option value="ADMINISTRATION">Administration</option>
+    </select>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-success btn-sm" 
+              (click)="saveTiers()"
+              [disabled]="!newTiers.nom">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+      <button type="button" class="btn btn-secondary btn-sm" 
+              (click)="toggleNewTiersForm()">
+        Annuler
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Destinataire (sortant) -->
+<div class="col-md-6" *ngIf="type === 'sortant'">
+  <label>Destinataire *</label>
+  <div class="input-group">
+    <select class="form-control"
+            [(ngModel)]="currentDocument.destinataireId"
+            name="destinataireId"
+            required>
+      <option [ngValue]="null">Sélectionner un destinataire</option>
+      <option *ngFor="let t of tiers" [ngValue]="t.id">{{ t.nom }}</option>
+    </select>
+    <div class="input-group-append">
+      <button type="button" class="btn btn-outline-primary"
+              (click)="toggleNewTiersForm()"
+              title="Ajouter un tiers">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mini-formulaire inline -->
+  <div *ngIf="showNewTiersForm" class="card mt-2 p-3">
+    <h6>Nouveau tiers</h6>
+    <input type="text" class="form-control mb-2"
+           placeholder="Nom *"
+           [(ngModel)]="newTiers.nom"
+           name="newTiersNom">
+    <input type="text" class="form-control mb-2"
+           placeholder="Email"
+           [(ngModel)]="newTiers.email"
+           name="newTiersEmail">
+    <input type="text" class="form-control mb-2"
+           placeholder="Téléphone"
+           [(ngModel)]="newTiers.telephone"
+           name="newTiersTelephone">
+    <select class="form-control mb-2"
+            [(ngModel)]="newTiers.type"
+            name="newTiersType">
+      <option value="PERSONNE_PHYSIQUE">Personne physique</option>
+      <option value="PERSONNE_MORALE">Personne morale</option>
+      <option value="ADMINISTRATION">Administration</option>
+    </select>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-success btn-sm"
+              (click)="saveTiers()"
+              [disabled]="!newTiers.nom">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+      <button type="button" class="btn btn-secondary btn-sm"
+              (click)="toggleNewTiersForm()">
+        Annuler
+      </button>
+    </div>
+  </div>
+</div>
 
   <!-- Mode réception / envoi -->
  <!-- Mode réception (entrant) -->
@@ -135,17 +238,7 @@
               </select>
             </div>
 
-            <div class="col-md-6">
-              <label>Statut</label>
-              <select class="form-control"
-                      [(ngModel)]="currentDocument.statut"
-                      name="statut">
-                <option value="NOUVEAU">Nouveau</option>
-                <option value="EN_COURS">En cours</option>
-                <option value="TRAITE">Traité</option>
-                <option value="REJETE">Rejeté</option>
-              </select>
-            </div>
+            
           </div>
 
           <!-- Pièces jointes -->
@@ -153,17 +246,13 @@
             <div class="card-header">Pièce jointe</div>
             <div class="card-body">
 
-              <label>Description</label>
-              <textarea class="form-control"
-                        [(ngModel)]="fileDescription"
-                        name="fileDescription"
-                        rows="2"></textarea>
+           
 
               <label class="mt-3">Sélectionner un fichier</label>
               <input type="file" class="form-control"
                      (change)="onFileSelected($event)"  multiple>
 
-              <div *ngIf="selectedFile" class="mt-2">
+              <div *ngIf="selectedFiles.length > 0" class="mt-2">
                 <button class="btn btn-outline-danger btn-sm" (click)="removeFile()">
                   Supprimer fichier
                 </button>

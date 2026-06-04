@@ -137,11 +137,7 @@
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="fermerDetails()">Fermer</button>
-        <button class="btn btn-success"
-                *ngIf="selectedPlanification?.statut !== 'TERMINE'"
-                (click)="fermerDetails(); repondre(selectedPlanification)">
-          ✉ Répondre
-        </button>
+        
       </div>
 
     </div>
@@ -184,7 +180,7 @@
             <label>Votre réponse *</label>
             <textarea class="form-control"
                       rows="4"
-                      [(ngModel)]="formReponse.message"
+                      [(ngModel)]="formReponse.commentaireResultat"
                       name="message" required>
             </textarea>
           </div>
@@ -195,7 +191,7 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="fermerReponse()">Annuler</button>
         <button class="btn btn-primary"
-                [disabled]="!formReponse.resultat || !formReponse.message"
+                [disabled]="!formReponse.resultat || !formReponse.commentaireResultat"
                 (click)="envoyerReponse()">
           Envoyer
         </button>

@@ -23,6 +23,8 @@ export class DocumentListComponent {
   @Output() deleteDocumentEvent = new EventEmitter<number>();
   @Output() sendDocumentEvent = new EventEmitter<Document>();
   @Output() viewDocumentEvent = new EventEmitter<Document>();
+  @Output() archiverDocumentEvent = new EventEmitter<Document>();
+  @Output() marquerTraiteEvent = new EventEmitter<Document>()
 
   constructor() {}
 
@@ -35,7 +37,7 @@ export class DocumentListComponent {
   }
 
  editDocument(doc: Document) {
-  console.log("ÉTAPE 1 - Bouton Modifier cliqué dans document-list");
+  
   this.editDocumentEvent.emit(doc);
 }
 
@@ -48,7 +50,13 @@ export class DocumentListComponent {
   }
 
   viewDocument(doc: Document) {
-    console.log("🔥 CLICK VIEW CHILD", doc);
+    
   this.viewDocumentEvent.emit(doc);
+}
+archiver(doc: Document) {
+  this.archiverDocumentEvent.emit(doc);
+}
+marquerTraite(doc: Document) {
+  this.marquerTraiteEvent.emit(doc);
 }
 }

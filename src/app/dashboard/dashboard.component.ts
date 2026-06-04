@@ -14,24 +14,13 @@ export class DashboardComponent implements OnInit {
   constructor(private documentService: DocumentService) { }
 
   ngOnInit() {
-    // Charger les documents
-    this.loadDocuments();
+    
 
     // Initialiser les graphiques
     this.initCharts();
   }
 
-  loadDocuments() {
-  this.documentService.getMesCourriersEntrants().subscribe({
-    next: data => this.documentsEntrants = data,
-    error: err => console.error(err)
-  });
-
-  this.documentService.getMesCourriersSortants().subscribe({
-    next: data => this.documentsSortants = data,
-    error: err => console.error(err)
-  });
-}
+  
 
   startAnimationForLineChart(chart: any) {
     let seq: any = 0, delays: any = 80, durations: any = 500;

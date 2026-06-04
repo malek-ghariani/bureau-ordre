@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PlanificationService } from 'app/services/planification.service';
 import { AuthService } from 'app/services/auth.service';
+import { DocumentService } from 'app/services/document.service';
 
 @Component({
   selector: 'app-planification-employe',
@@ -13,7 +14,7 @@ export class PlanificationEmployeComponent implements OnInit {
   showDetailsModal = false;
   selectedPlanification: any = null;
 
-  formReponse = { resultat: '', message: '' };
+  formReponse = { resultat: '', commentaireResultat: '' };
 
   resultatsOptions = [
     { value: 'TERMINE',               label: 'Terminé' },
@@ -24,19 +25,20 @@ export class PlanificationEmployeComponent implements OnInit {
 
   constructor(
     private service: PlanificationService,
-    private auth: AuthService
+    private auth: AuthService,
+    private documentService: DocumentService
   ) {}
 
   ngOnInit(): void {
-    this.load(this.auth.getId());
+     this.load();
   }
 
-  load(id: number) {
-    this.service.getByDestinataire(id).subscribe({
-      next: (data) => this.planifications = data,
-      error: (err) => console.error(err)
-    });
-  }
+  load() {
+  this.service.getMesPlanifications().subscribe({
+    next: (res) => this.planifications = res ?? [],
+    error: (err: any) => console.error(err)
+  });
+}
 
   // ================= DÉTAILS =================
   ouvrirDetails(p: any) {
@@ -57,38 +59,43 @@ export class PlanificationEmployeComponent implements OnInit {
 
   fermerReponse() {
     this.showReponseModal = false;
-    this.formReponse = { resultat: '', message: '' };
+    this.formReponse = { resultat: '', commentaireResultat: '' };
     this.selectedPlanification = null;
   }
 
   envoyerReponse() {
-    if (!this.selectedPlanification?.id) return;
+  if (!this.selectedPlanification?.id) return;
 
-    this.service.repondre(
-      this.selectedPlanification.id,
-      this.formReponse.resultat,
-      this.formReponse.message
-    ).subscribe({
-      next: () => {
-        this.fermerReponse();
-        this.load(this.auth.getId());
-      },
-      error: (err) => console.error(err)
-    });
-  }
+  this.service.repondre(this.selectedPlanification.id, {
+    commentaireResultat: this.formReponse.commentaireResultat,
+    resultat: this.formReponse.resultat
+  }).subscribe({
+    next: () => {
+      this.fermerReponse();
+      this.load();
+    },
+    error: (err: any) => console.error(err)
+  });
+}
 
   // ================= PIÈCES JOINTES =================
-  telechargerPieceJointe(id: number, nom: string) {
-    this.service.telechargerPieceJointe(id).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nom;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err) => console.error('Erreur téléchargement', err)
-    });
-  }
+telechargerPieceJointe(id: number, nom: string) {
+  this.documentService.downloadPieceJointe(id).subscribe({
+    next: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nom;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
+    error: (err: any) => console.error('Erreur téléchargement', err)
+  });
+}
+  ouvrirReponseDepuisDetails() {
+  const p = this.selectedPlanification;
+  this.showDetailsModal = false;
+  // ne pas null selectedPlanification ici
+  this.showReponseModal = true;
+}
 }

@@ -5,6 +5,7 @@ import { ResponsableDashboardComponent } from './responsable-dashboard/responsab
 import { DocumentComponent } from 'app/components/document/document.component';
 import { ListePlanificationsComponent } from 'app/components/planification/liste-planifications/liste-planifications.component';
 import { FormulairePlanificationComponent } from 'app/components/planification/formulaire-planification/formulaire-planification.component';
+import { ArchivesComponent } from 'app/components/archives/archives.component';
 
 const routes: Routes = [
   {
@@ -17,7 +18,7 @@ const routes: Routes = [
        { path: 'planifications', component: ListePlanificationsComponent },
       { path: 'planifications/nouveau', component: FormulairePlanificationComponent },
       { path: 'planifications/:id', component: FormulairePlanificationComponent },
-      
+      { path: 'archives', component: ArchivesComponent },
     ]
   }
 ];

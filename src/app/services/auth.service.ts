@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { ApiResponse } from '../models/ApiResponse.model';
 
 interface LoginResponse {
   token: string;
@@ -24,19 +25,20 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   // 🔹 Login et stockage token + infos utilisateur
-  login(credentials: { email: string; password: string }): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(this.apiURL, credentials).pipe(
-      tap(res => {
-        if (res.token) {
-          this.saveToken(res.token);
-          this.saveRole(res.role);
-          this.saveEmail(res.email);
-          this.saveNom(res.nom);
-          this.saveMatricule(res.matricule);
-        }
-      })
+  login(credentials: { email: string; password: string }): Observable<ApiResponse<LoginResponse>> {
+    return this.http.post<ApiResponse<LoginResponse>>(this.apiURL, credentials).pipe(
+        tap(res => {
+            if (res.data?.token) {
+                this.saveToken(res.data.token);
+                this.saveRole(res.data.role);
+                this.saveEmail(res.data.email);
+                this.saveNom(res.data.nom);
+                this.saveMatricule(res.data.matricule);
+                if (res.data.id) this.saveId(res.data.id);
+            }
+        })
     );
-  }
+}
 
   // ---------------------------
   // 🔐 Gestion Token

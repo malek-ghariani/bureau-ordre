@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { EmployeService, EmployeDTO } from 'app/services/employe.service';
+import { DepartementService } from '../../../services/departement.service';
+import { DepartementDTO } from '../../../models/departement.model';
 
 @Component({
   selector: 'app-employe',
@@ -8,15 +10,30 @@ import { EmployeService, EmployeDTO } from 'app/services/employe.service';
 })
 export class EmployeComponent implements OnInit {
   employees: EmployeDTO[] = [];
+  departements: DepartementDTO[] = [];  
   selected: EmployeDTO = {} as EmployeDTO;
   showForm = false;
 
-  constructor(private employeeService: EmployeService) {}
+  constructor(private employeeService: EmployeService,
+    private departementService: DepartementService 
+  ) {}
 
   ngOnInit() {
     console.log('Token présent:', localStorage.getItem('token'));
     this.load();
+    this.loadDepartements();
   }
+  loadDepartements() {
+    this.departementService.getAll().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.departements = res.data;
+        }
+      },
+      error: (err) => console.error('Erreur départements:', err)
+    });
+  }
+
 
   load() {
     this.employeeService.getAll().subscribe({
@@ -31,13 +48,23 @@ export class EmployeComponent implements OnInit {
     });
   }
 
-  add() {
-    this.selected = {} as EmployeDTO;
-    this.selected.role = 'AGENT';
-    this.selected.departementCode = 'DEP001'; // CORRIGÉ: DEP001 au lieu de DEP01
-    this.selected.enabled = true;
-    this.showForm = true;
+private emptyEmploye(): EmployeDTO {
+    return {
+      nom: '',
+      email: '',
+      password: '',
+      matricule: '',
+      poste: '',
+      departementCode: '',  
+      role: 'AGENT',
+      enabled: true
+    };
   }
+  
+  add() {
+  this.selected = this.emptyEmploye();
+  this.showForm = true;
+}
 
   edit(emp: EmployeDTO) {
     this.selected = { ...emp };

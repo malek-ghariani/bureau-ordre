@@ -36,11 +36,12 @@
         <div class="col-md-6">
           <div class="form-group mb-3">
             <label>Chef de département</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              [(ngModel)]="selected.chefDepartement" 
-              name="chefDepartement">
+            <select class="form-control" [(ngModel)]="selected.chefDepartementId" name="chefDepartementId">
+  <option [value]="null">Aucun</option>
+  <option *ngFor="let emp of employes" [value]="emp.id">
+    {{ emp.nom }}
+  </option>
+</select>
           </div>
           <div class="form-group mb-3">
             <label>Email</label>
@@ -89,7 +90,7 @@
         <tr *ngFor="let dept of departements">
           <td>{{ dept.code }}</td>
           <td>{{ dept.nom }}</td>
-          <td>{{ dept.chefDepartement || '-' }}</td>
+          <td>{{ dept.chefDepartementId || '-' }}</td>
           <td>{{ dept.email || '-' }}</td>
           <td>{{ dept.telephone || '-' }}</td>
           <td>

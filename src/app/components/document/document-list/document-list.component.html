@@ -36,7 +36,12 @@
   <td>{{ doc.typeDocument }}</td>
 
   <td>
-    <span class="badge">{{ doc.statut }}</span>
+    <span class="badge" [ngClass]="{
+  'badge-secondary': doc.statut === 'NOUVEAU',
+  'badge-primary':   doc.statut === 'EN_COURS',
+  'badge-success':   doc.statut === 'TRAITE',
+  'badge-dark':      doc.statut === 'ARCHIVE'
+}">{{ doc.statut }}</span>
   </td>
 
   <td>
@@ -53,35 +58,49 @@
 
   <!-- ✅ TOUTES LES ACTIONS ICI -->
   <td>
+  <!-- Voir -->
+  <button class="btn btn-primary btn-sm mr-1 mb-1"
+          (click)="viewDocument(doc)">
+    <i class="material-icons">visibility</i>
+  </button>
 
-    <!-- Voir -->
-    <button class="btn btn-primary btn-sm mr-2 mb-1"
-            (click)="viewDocument(doc)" title="Voir détails">
-      <i class="material-icons">visibility</i>
-    </button>
+  <!-- Modifier — seulement si NOUVEAU -->
+  <button *ngIf="role === 'RESPONSABLE' && doc.statut === 'NOUVEAU'"
+          class="btn btn-info btn-sm mr-1 mb-1"
+          (click)="editDocument(doc)">
+    <i class="material-icons">edit</i>
+  </button>
 
-    <!-- Envoyer -->
-    <button *ngIf="role === 'RESPONSABLE'"
-            class="btn btn-success btn-sm mr-2 mb-1"
-            (click)="openSendModal(doc)">
-      <i class="material-icons">send</i>
-    </button>
+  <!-- Envoyer — seulement si NOUVEAU ou EN_COURS -->
+  <button *ngIf="role === 'RESPONSABLE' && (doc.statut === 'NOUVEAU' || doc.statut === 'EN_COURS')"
+          class="btn btn-success btn-sm mr-1 mb-1"
+          (click)="openSendModal(doc)">
+    <i class="material-icons">send</i>
+  </button>
 
-    <!-- Modifier -->
-    <button *ngIf="role !== 'ADMIN'"
-            class="btn btn-info btn-sm mr-2 mb-1"
-            (click)="editDocument(doc)">
-      <i class="material-icons">edit</i>
-    </button>
+  <!-- Marquer traité — seulement si EN_COURS -->
+  <button *ngIf="role === 'RESPONSABLE' && doc.statut === 'EN_COURS'"
+          class="btn btn-warning btn-sm mr-1 mb-1"
+          (click)="marquerTraite(doc)"
+          title="Marquer comme traité">
+    <i class="material-icons">done_all</i>
+  </button>
 
-    <!-- Supprimer -->
-    <button *ngIf="role === 'RESPONSABLE'"
-            class="btn btn-danger btn-sm mb-1"
-            (click)="deleteDocument(doc.id!)">
-      <i class="material-icons">delete</i>
-    </button>
+  <!-- Archiver — seulement si TRAITE -->
+<button *ngIf="role === 'RESPONSABLE' && doc.statut === 'TRAITE' && doc.etat !== 'ARCHIVE'"
+        class="btn btn-dark btn-sm mr-1 mb-1"
+        (click)="archiver(doc)"
+        title="Archiver">
+  <i class="material-icons">archive</i>
+</button>
 
-  </td>
+  <!-- Supprimer — seulement si NOUVEAU -->
+  <button *ngIf="role === 'RESPONSABLE' && doc.statut === 'NOUVEAU'"
+          class="btn btn-danger btn-sm mb-1"
+          (click)="deleteDocument(doc.id!)">
+    <i class="material-icons">delete</i>
+  </button>
+</td>
 
 </tr>
     </tbody>

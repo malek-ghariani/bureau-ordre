@@ -20,7 +20,8 @@ export class SidebarComponent implements OnInit {
     if (this.role === 'RESPONSABLE') {
       this.menuItems = [
         { path: '/responsable/documents', title: 'Courriers' },
-        { path: '/responsable/planifications', title: 'Planification' }
+        { path: '/responsable/planifications', title: 'Planification' },
+        { path: '/responsable/archives', title: '🗂 Archives' } 
       ];
     }
 

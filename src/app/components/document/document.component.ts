@@ -3,6 +3,7 @@ import { DocumentService } from '../../services/document.service';
 import { TransmissionService } from '../../services/transmission.service';
 import { Document } from './document-form/document-form.component';
 import { AuthService } from 'app/services/auth.service';
+import { EmployeService } from '../../services/employe.service';
 @Component({
   selector: 'app-document',
   templateUrl: './document.component.html'
@@ -32,6 +33,7 @@ export class DocumentComponent implements OnInit {
     private documentService: DocumentService,
     private authService: AuthService,
     private transmissionService: TransmissionService,
+    private employeService: EmployeService
   ) {}
   ngOnInit(): void {
     this.role = this.authService.getRole() || '';
@@ -49,7 +51,7 @@ export class DocumentComponent implements OnInit {
    
   }
   loadEmployes() {
-    this.documentService.getEmployes().subscribe({
+    this.employeService.getAll().subscribe({
       next: res => this.employes = res.data,
       error: err => console.error(err)
     });
@@ -57,11 +59,11 @@ export class DocumentComponent implements OnInit {
   loadDocuments(): void {
     if (this.role === 'RESPONSABLE') {
       if (this.type === 'entrant') {
-        this.documentService.getMesCourriersEntrants().subscribe(res => {
+        this.documentService.getAllEntrants().subscribe(res => {
           this.documents = res.data || [];
         });
       } else {
-        this.documentService.getMesCourriersSortants().subscribe(res => {
+        this.documentService.getAllSortants().subscribe(res => {
           this.documents = res.data || [];
         });
       }
@@ -73,10 +75,7 @@ export class DocumentComponent implements OnInit {
       error: err => console.error(err)
     });
 
-    this.transmissionService.getEnvoyes().subscribe({
-      next: res => this.transmissionsEnvoyees = res.data || [],
-      error: err => console.error(err)
-    });
+   
   }
   changeType(type: 'entrant' | 'sortant') {
     this.type = type;
@@ -101,9 +100,8 @@ export class DocumentComponent implements OnInit {
   }
 
   onDocumentSaved(savedDoc: Document) {
-    this.loadDocuments();
-    this.closeDocumentForm();
-  }
+  this.loadDocuments(); // closeDocumentForm est déjà appelé par l'enfant
+}
 
   editDocument(doc: Document) {
   console.log("ÉTAPE 2 - Parent reçoit l'événement Modifier");
@@ -174,9 +172,9 @@ closeViewModal() {
     this.onView(doc);
   }
   
-  get showBackdrop(): boolean {
-    return this.selectedDoc || this.showDocumentForm || this.showSendModal;
-  }
+ get showBackdrop(): boolean {
+  return !!this.selectedDoc || this.showDocumentForm || this.showSendModal;
+}
 
  private closeAllModals() {
   this.showDocumentForm = false;
@@ -191,8 +189,40 @@ closeViewModal() {
 }
 onTransmissionEnvoyee() {
   this.closeSendModal();
+  this.loadDocuments(); 
   this.loadTransmissions();
   alert('Courrier envoyé avec succès !');
+}
+archiverDocument(doc: Document) {
+  if (!confirm('Confirmer l\'archivage de ce courrier ?')) return;
+
+  const obs = this.type === 'entrant'
+    ? this.documentService.archiverEntrant(doc.id!)
+    : this.documentService.archiverSortant(doc.id!);
+
+  obs.subscribe({
+    next: () => {
+      alert('Courrier archivé avec succès !');
+      this.loadDocuments();
+    },
+    error: () => alert('Erreur lors de l\'archivage')
+  });
+}
+marquerTraite(doc: Document) {
+  if (!confirm('Marquer ce courrier comme traité ?')) return;
+
+  const obs = this.type === 'entrant'
+    ? this.documentService.changerStatutEntrant(doc.id!, 'TRAITE')
+    : this.documentService.changerStatutSortant(doc.id!, 'TRAITE');
+
+  obs.subscribe({
+    next: () => this.loadDocuments(),
+    error: () => alert('Erreur')
+  });
+}
+today = new Date()
+imprimerBordereau() {
+  window.print();
 }
 
 }

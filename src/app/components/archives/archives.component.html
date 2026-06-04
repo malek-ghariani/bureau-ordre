@@ -1,0 +1,234 @@
+<div class="container-fluid mt-3">
+
+  <!-- HEADER -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">🗂 Archives</h3>
+      <div>
+        <button class="btn btn-sm mr-2"
+                [ngClass]="tab === 'entrant' ? 'btn-light' : 'btn-outline-light'"
+                (click)="changeTab('entrant')">
+          📥 Courriers Entrants
+        </button>
+        <button class="btn btn-sm"
+                [ngClass]="tab === 'sortant' ? 'btn-light' : 'btn-outline-light'"
+                (click)="changeTab('sortant')">
+          📤 Courriers Sortants
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <input type="text" class="form-control"
+                 placeholder="Référence..."
+                 [(ngModel)]="filtreReference">
+        </div>
+        <div class="col-md-3">
+          <input type="text" class="form-control"
+                 [placeholder]="tab === 'entrant' ? 'Expéditeur...' : 'Destinataire...'"
+                 [(ngModel)]="filtreExpediteur">
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control"
+                 [(ngModel)]="filtreDateDebut"
+                 placeholder="Date début">
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control"
+                 [(ngModel)]="filtreDateFin"
+                 placeholder="Date fin">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-secondary w-100" (click)="resetFiltres()">
+            🔄 Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTE -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-bordered table-hover mb-0">
+        <thead class="thead-dark">
+          <tr>
+            <th>N° Ordre</th>
+            <th>Référence</th>
+            <th>{{ tab === 'entrant' ? 'Expéditeur' : 'Destinataire' }}</th>
+            <th>{{ tab === 'entrant' ? 'Date réception' : 'Date émission' }}</th>
+            <th>Date archivage</th>
+            <th>Priorité</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of archivesFiltrees">
+            <td>{{ a.numeroOrdre }}</td>
+            <td>{{ a.reference || '—' }}</td>
+            <td>{{ tab === 'entrant' ? (a.expediteur || '—') : (a.destinataire || '—') }}</td>
+            <td>{{ (a.dateReception || a.dateEmission) | date:'dd/MM/yyyy' }}</td>
+            <td>{{ a.dateArchivage | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="badge"
+                    [ngClass]="{
+                      'badge-danger': a.priorite === 'URGENTE',
+                      'badge-warning': a.priorite === 'HAUTE',
+                      'badge-info': a.priorite === 'NORMALE'
+                    }">
+                {{ a.priorite }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary"
+                      (click)="ouvrirDetails(a)">
+                👁 Voir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="archivesFiltrees.length === 0">
+            <td colspan="7" class="text-center text-muted py-4">
+              Aucune archive trouvée.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL DÉTAILS -->
+<div class="modal fade show d-block"
+     *ngIf="showDetailsModal"
+     style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">
+          🗂 Archive — {{ selectedArchive?.numeroOrdre }}
+        </h5>
+        <button class="close text-white" (click)="fermerDetails()">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedArchive">
+
+        <!-- Infos générales -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="font-weight-bold">N° Ordre</label>
+            <p>{{ selectedArchive.numeroOrdre }}</p>
+          </div>
+          <div class="col-md-4">
+            <label class="font-weight-bold">Référence</label>
+            <p>{{ selectedArchive.reference || '—' }}</p>
+          </div>
+          <div class="col-md-4">
+            <label class="font-weight-bold">Priorité</label>
+            <p><span class="badge badge-warning">{{ selectedArchive.priorite }}</span></p>
+          </div>
+          <div class="col-md-4">
+            <label class="font-weight-bold">
+              {{ tab === 'entrant' ? 'Expéditeur' : 'Destinataire' }}
+            </label>
+            <p>{{ selectedArchive.expediteur || selectedArchive.destinataire || '—' }}</p>
+          </div>
+          <div class="col-md-4">
+            <label class="font-weight-bold">
+              {{ tab === 'entrant' ? 'Date réception' : 'Date émission' }}
+            </label>
+            <p>{{ (selectedArchive.dateReception || selectedArchive.dateEmission) | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <div class="col-md-4">
+            <label class="font-weight-bold">Date archivage</label>
+            <p>{{ selectedArchive.dateArchivage | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- Historique transmissions -->
+        <h6 class="font-weight-bold mb-3">📋 Historique des transmissions</h6>
+
+        <div *ngIf="selectedArchive.transmissions?.length > 0; else noTransmissions">
+          <div class="card mb-2"
+               *ngFor="let t of selectedArchive.transmissions; let i = index">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <small class="text-muted">De</small>
+                  <p class="mb-0 font-weight-bold">{{ t.expediteurNom }}</p>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted">À</small>
+                  <p class="mb-0 font-weight-bold">{{ t.destinataireNom }}</p>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted">Date envoi</small>
+                  <p class="mb-0">{{ t.dateEnvoi | date:'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted">Résultat</small>
+                  <p class="mb-0">
+                    <span class="badge badge-success" *ngIf="t.resultat">{{ t.resultat }}</span>
+                    <span class="text-muted" *ngIf="!t.resultat">—</span>
+                  </p>
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <small class="text-muted">Instruction du responsable</small>
+                  <div class="border p-2 bg-light">{{ t.message || '—' }}</div>
+                </div>
+                <div class="col-md-6" *ngIf="t.reponseEmploye">
+                  <small class="text-muted">Réponse de l'employé</small>
+                  <div class="border p-2 bg-light text-success">{{ t.reponseEmploye }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noTransmissions>
+          <p class="text-muted">Aucune transmission enregistrée.</p>
+        </ng-template>
+
+        <hr>
+
+        <!-- Pièces jointes -->
+        <h6 class="font-weight-bold mb-3">📎 Pièces jointes</h6>
+
+        <div *ngIf="selectedArchive.piecesJointes?.length > 0; else noFiles">
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center"
+                *ngFor="let pj of selectedArchive.piecesJointes">
+              <span>📎 {{ pj.nomFichier }}</span>
+              <button class="btn btn-sm btn-outline-primary"
+                      (click)="telechargerPieceJointe(pj.id, pj.nomFichier)">
+                ⬇ Télécharger
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <ng-template #noFiles>
+          <p class="text-muted">Aucune pièce jointe.</p>
+        </ng-template>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerDetails()">Fermer</button>
+      </div>
+
+    </div>
+  </div>
+</div>

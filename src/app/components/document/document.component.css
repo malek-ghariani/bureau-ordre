@@ -48,3 +48,15 @@ body.modal-open {
   border-radius: 10px;
   padding: 20px;
 }
+/* Cacher le bordereau en mode normal */
+#bordereau-print {
+  display: none;
+}
+
+/* À l'impression : cacher tout sauf le bordereau */
+@media print {
+  body * { visibility: hidden; }
+  #bordereau-print { display: block !important; }
+  #bordereau-print, #bordereau-print * { visibility: visible; }
+  #bordereau-print { position: absolute; top: 0; left: 0; width: 100%; }
+}

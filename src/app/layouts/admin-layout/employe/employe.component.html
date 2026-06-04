@@ -1,5 +1,5 @@
 <div class="container mt-3">
-  <button class="btn btn-primary mb-3" (click)="add()">Nouveau Employé</button>
+  <button class="btn btn-primary mb-3" (click)="add()">Nouvel Employé</button>
 
   <!-- Formulaire -->
   <div *ngIf="showForm" class="card card-body mb-3">
@@ -31,13 +31,18 @@
             <input type="text" class="form-control" [(ngModel)]="selected.poste" name="poste">
           </div>
           <div class="form-group">
-            <label>Département *</label>
-            <select class="form-control" [(ngModel)]="selected.departementCode" name="departementCode" required>
-              <option value="">Sélectionner un département</option>
-              <option value="DEP001">Informatique</option>
-              <option value="DEP01">Administration</option>
-            </select>
-          </div>
+  <label>Département *</label>
+  <select class="form-control" 
+          [(ngModel)]="selected.departementCode" 
+          name="departementCode" 
+          required>
+    <option value="">Sélectionner un département</option>
+    <option *ngFor="let dep of departements" 
+            [value]="dep.code">
+      {{ dep.nom }}
+    </option>
+  </select>
+</div>
         </div>
 
         <div class="col-md-4">
@@ -49,10 +54,38 @@
               <option value="AGENT">AGENT</option>
             </select>
           </div>
-          <div class="form-check mt-4">
-            <input type="checkbox" class="form-check-input" [(ngModel)]="selected.enabled" name="enabled">
-            <label class="form-check-label">Actif</label>
-          </div>
+   
+
+<div class="form-group mt-3">
+  <label class="form-label fw-bold">Actif</label>
+
+  <div class="btn-group" role="group">
+
+    <input type="radio" class="btn-check"
+           name="enabled"
+           [(ngModel)]="selected.enabled"
+           [value]="true"
+           id="btnOui">
+
+    <label class="btn btn-outline-success" for="btnOui">
+      Oui
+    </label>
+
+    <input type="radio" class="btn-check"
+           name="enabled"
+           [(ngModel)]="selected.enabled"
+           [value]="false"
+           id="btnNon">
+
+    <label class="btn btn-outline-danger" for="btnNon">
+      Non
+    </label>
+
+  </div>
+</div>
+
+  
+
         </div>
       </div>
 

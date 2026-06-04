@@ -2,22 +2,30 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { DocumentService } from '../../../services/document.service';
 import { HttpEventType } from '@angular/common/http';
 import { PieceJointeDTO } from 'app/models/piece-jointe.model';
+import { TiersService } from '../../../services/tiers.service';
+import { Tiers } from 'app/models/tiers.model';
+import { ApiResponse } from 'app/models/ApiResponse.model';
 
 export interface Document {
   id?: number;
+  numeroOrdre?: string;       // ← ajoute
   dateReception?: string;
   dateEmission?: string;
+  dateSaisie?: string;        // ← ajoute
   typeDocument: string;
   reference: string;
   nature: string;
-  expediteur: string;
-  destinataire?: string; 
+  expediteurId?: number;      // ← pour Spring
+        
+  nomExpediteur?: string;     // ← retourné par Spring
+  destinataireId?: number;    // ← pour Spring
+  
+  nomDestinataire?: string;   // ← retourné par Spring
   modeReception?: string;
   modeExpedition?: string;
   priorite: string;
   statut: string;
-  etat?: string; 
-  pieceJointesCount?: number;
+  etat?: string;
 }
 
 @Component({
@@ -33,6 +41,7 @@ export class DocumentFormComponent implements OnChanges {
   @Output() closeForm = new EventEmitter<void>();
   @Output() savedDocument = new EventEmitter<Document>();
 
+  tiers: any[] = []; 
   pieceJointes: any[] = [];
   selectedFiles: File[] = [];
   filePreviewUrl: string | null = null;
@@ -42,24 +51,36 @@ export class DocumentFormComponent implements OnChanges {
   isEditMode = false;
   today = '';
 
-  constructor(private documentService: DocumentService) {
+  constructor(
+    private documentService: DocumentService,
+    private tiersService: TiersService
+  ) {
     this.today = this.getTodayDate();
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    if (changes['showModal'] && this.showModal) {
+      this.loadTiers();  // ← charge à l'ouverture
+    }
     if (changes['currentDocument'] && this.currentDocument) {
       this.isEditMode = !!this.currentDocument.id;
 
-      this.selectedFiles = null;
+      this.selectedFiles = [];
       this.filePreviewUrl = null;
       this.fileDescription = '';
       this.pieceJointes = [];
 
-      if (this.isEditMode && this.currentDocument.id) {
-        this.loadPieceJointes(this.currentDocument.id);
-      }
+     if (this.isEditMode && this.currentDocument.id) {
+      // mode édition → charger les pièces jointes, ne pas toucher aux dates
+      this.loadPieceJointes(this.currentDocument.id);
+    } else {
+      // mode création → pré-remplir avec la date du jour
+      this.currentDocument.dateReception = this.today;
+      this.currentDocument.dateEmission = this.today;
+    }
     }
   }
+  
 
   private getTodayDate(): string {
     const d = new Date();
@@ -72,36 +93,50 @@ export class DocumentFormComponent implements OnChanges {
   }
 
   onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (!file) return;
+  const files: FileList = event.target.files;
+  if (!files || files.length === 0) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Fichier trop volumineux (max 10MB)');
-      return;
+  this.selectedFiles = Array.from(files).filter(f => {
+    if (f.size > 10 * 1024 * 1024) {
+      alert(`Fichier ${f.name} trop volumineux (max 10MB)`);
+      return false;
     }
+    return true;
+  });
 
-    this.selectedFiles = [file];
-
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = e => this.filePreviewUrl = (e.target as any).result;
-      reader.readAsDataURL(file);
-    } else {
-      this.filePreviewUrl = null;
-    }
+  // Preview seulement pour le premier fichier image
+  const first = this.selectedFiles[0];
+  if (first?.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => this.filePreviewUrl = (e.target as any).result;
+    reader.readAsDataURL(first);
+  } else {
+    this.filePreviewUrl = null;
+  }
+}
+  loadTiers() {
+    this.tiersService.getAll().subscribe({
+      next: res => {
+        if (res.success && res.data) {
+          this.tiers = res.data;
+        }
+      },
+      error: err => console.error('Erreur chargement tiers:', err)
+    });
   }
 
+
   removeFile() {
-    this.selectedFiles = null;
+    this.selectedFiles = [];
     this.filePreviewUrl = null;
     this.fileDescription = '';
   }
 
  saveDocument() {
   if (!this.currentDocument) return;
-
+ console.log('currentDocument:', this.currentDocument);
   const data: any = { ...this.currentDocument };
-
+console.log('data envoyé:', data); 
   if (data.dateReception) data.dateReception = this.formatDate(data.dateReception);
   if (data.dateEmission) data.dateEmission = this.formatDate(data.dateEmission);
 
@@ -111,7 +146,7 @@ export class DocumentFormComponent implements OnChanges {
     data.modeExpedition = data.modeExpedition || 'EMAIL';
   }
 
-  data.statut = data.statut || 'NOUVEAU';
+  
   data.priorite = data.priorite || 'NORMALE';
   data.etat = data.etat || 'ACTIVE';
 
@@ -150,25 +185,24 @@ export class DocumentFormComponent implements OnChanges {
     return;
   }
 
-  const uploads = this.selectedFiles.map(file => {
-    return this.type === 'entrant'
-      ? this.documentService.uploadPieceJointeEntrant(docId, file, this.fileDescription).toPromise()
-      : this.documentService.uploadPieceJointeSortant(docId, file, this.fileDescription).toPromise();
-  });
+  const upload = this.type === 'entrant'
+        ? this.documentService.uploadPieceJointeEntrant(docId, this.selectedFiles, this.fileDescription)
+        : this.documentService.uploadPieceJointeSortant(docId, this.selectedFiles, this.fileDescription);
 
-  Promise.all(uploads)
-    .then(() => {
-      this.loadPieceJointes(docId);
-      this.resetFile();
-      this.finishSave(this.currentDocument); // ⭐ IMPORTANT
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Erreur upload pièces jointes");
-      this.finishSave(this.currentDocument);
+    upload.subscribe({
+        next: () => {
+            this.loadPieceJointes(docId);
+            this.resetFile();
+            this.finishSave(this.currentDocument);
+        },
+        error: err => {
+            console.error(err);
+            alert("Erreur upload pièces jointes");
+            this.finishSave(this.currentDocument);
+        }
     });
-
-} private afterSave(doc: Document) {
+}
+ private afterSave(doc: Document) {
   this.isUploading = false;        // Débloque le bouton
   this.fileUploadProgress = 0;
   this.savedDocument.emit(doc);
@@ -176,9 +210,10 @@ export class DocumentFormComponent implements OnChanges {
 }
 
 close() {
-  this.showModal = false;
+  
+   this.showNewTiersForm = false;
+  this.resetNewTiers();
   this.closeForm.emit();
-
   this.currentDocument = {} as Document;
   this.resetFile(); // ⭐ mieux que répéter
   this.pieceJointes = [];
@@ -263,6 +298,40 @@ openPieceJointe(piece: PieceJointeDTO) {
 onFilesSelected(event: any) {
   const files: FileList = event.target.files;
   this.selectedFiles = Array.from(files);
+}
+newTiers: Tiers = { nom: '', email: '', telephone: '', type: 'PERSONNE_PHYSIQUE' };
+showNewTiersForm = false;
+toggleNewTiersForm() {
+  this.showNewTiersForm = !this.showNewTiersForm;
+  if (!this.showNewTiersForm) {
+    this.resetNewTiers();
+  }
+}
+
+private resetNewTiers() {
+  this.newTiers = { nom: '', email: '', telephone: '', type: 'PERSONNE_PHYSIQUE' };
+}
+saveTiers() {
+  if (!this.newTiers.nom?.trim()) return;
+
+  this.tiersService.create(this.newTiers).subscribe({
+    next: (res: ApiResponse<Tiers>) => {
+      if (res.success && res.data) {
+        this.tiers.push(res.data);
+        if (this.type === 'entrant') {
+          this.currentDocument.expediteurId = res.data.id;
+        } else {
+          this.currentDocument.destinataireId = res.data.id;
+        }
+        this.showNewTiersForm = false;
+        this.resetNewTiers();
+      }
+    },
+    error: err => {
+      console.error('Erreur création tiers:', err);
+      alert('Erreur lors de la création du tiers');
+    }
+  });
 }
   
 }

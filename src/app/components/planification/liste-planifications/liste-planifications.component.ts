@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { PlanificationService } from '../../../services/planification.service';
-import { TransmissionService } from '../../../services/transmission.service';
-import { EmployeDTO, EmployeService } from '../../../services/employe.service';
+
 
 @Component({
   selector: 'app-liste-planifications',
@@ -20,45 +19,31 @@ export class ListePlanificationsComponent implements OnInit {
   isEdit = false;
   form: any = {};
 
-  selectedReponse: { resultat: string; message: string } | null = null;
+  selectedReponse: { resultat: string; commentaireResultat: string } | null = null;
 
   constructor(
     private service: PlanificationService,
-    private transmissionService: TransmissionService,
-    private employeService: EmployeService
+    
   ) {}
 
   ngOnInit(): void {
     this.loadPlanifications();
-    this.loadEmployes();
+    
   }
 
   // ================= LISTE =================
-  loadPlanifications() {
-    this.service.getAll().subscribe({
-      next: (res) => {
-        this.planifications = res ?? [];
-      },
-      error: (err) => console.error(err)
-    });
-  }
+ loadPlanifications() {
+  this.service.getAll().subscribe({
+    next: (res) => {
+      this.planifications = res ?? []; // ← res.data pas res
+    },
+    error: (err) => console.error(err)
+  });
+}
 
-  // ================= EMPLOYÉS =================
-  loadEmployes() {
-    this.employeService.getAll().subscribe({
-      next: (res) => {
-        this.employes = res.data ?? [];
-      },
-      error: (err) => console.error(err)
-    });
-  }
+  
 
-  // ================= CREATE =================
-  create() {
-    this.isEdit = false;
-    this.form = {};
-    this.showForm = true;
-  }
+ 
 
   // ================= EDIT =================
   edit(p: any) {
@@ -89,35 +74,29 @@ export class ListePlanificationsComponent implements OnInit {
   }
 
   // ================= FORM =================
-  closeForm() {
-    this.showForm = false;
-  }
+ closeForm() {
+  this.showForm = false;
+}
 
-  savePlanification(data: any) {
+savePlanification(data: any) {
+  if (!this.isEdit) return; // pas de création manuelle
 
-    const obs = this.isEdit
-      ? this.service.update(data.id, data)
-      : this.service.create(data);
-
-    obs.subscribe({
-      next: () => {
-        this.loadPlanifications();
-        this.closeForm();
-      },
-      error: (err) => console.error(err)
-    });
-  }
-
+  this.service.update(data.id, data).subscribe({
+    next: () => {
+      this.loadPlanifications();
+      this.closeForm();
+    },
+    error: (err: any) => console.error(err)
+  });
+}
   // ================= MODAL REPONSE =================
   showReponseModal = false;
 
-  showReponse(p: any) {
-
-    this.selectedReponse = {
-      resultat: p.resultat,
-      message: p.message
-    };
-
-    this.showReponseModal = true;
-  }
+ showReponse(p: any) {
+  this.selectedReponse = {
+    resultat: p.resultat,
+    commentaireResultat: p.commentaireResultat  // ✅
+  };
+  this.showReponseModal = true;
+}
 }

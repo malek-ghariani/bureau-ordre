@@ -5,17 +5,19 @@
 <div *ngIf="role === 'RESPONSABLE'">
 
   <!-- Liste des documents -->
-  <app-document-list
-    [documents]="documents"
-    [type]="type"
-    [role]="role"
-    (changeTypeEvent)="changeType($event)"
-    (createDocumentEvent)="openDocumentForm()"
-    (editDocumentEvent)="editDocument($event)"
-    (deleteDocumentEvent)="deleteDocument($event)"
-    (sendDocumentEvent)="openSendModal($event)"
-    (viewDocumentEvent)="onView($event)"
-  ></app-document-list>
+<app-document-list
+  [documents]="documents"
+  [type]="type"
+  [role]="role"
+  (changeTypeEvent)="changeType($event)"
+  (createDocumentEvent)="openDocumentForm()"
+  (editDocumentEvent)="editDocument($event)"
+  (deleteDocumentEvent)="deleteDocument($event)"
+  (sendDocumentEvent)="openSendModal($event)"
+  (viewDocumentEvent)="onView($event)"
+  (archiverDocumentEvent)="archiverDocument($event)"
+  (marquerTraiteEvent)="marquerTraite($event)">
+</app-document-list>
 
   <!-- MODALE DOCUMENT (VIEW) - Placée ICI, à l'intérieur de RESPONSABLE -->
  <div class="modal fade show"
@@ -47,9 +49,13 @@
           <b>Date émission :</b> {{ selectedDoc?.dateEmission | date:'dd/MM/yyyy' }}
         </p>
 
-        <p>
-          <b>Expéditeur :</b> {{ selectedDoc?.expediteur?.nom || '—' }}
-        </p>
+       <p *ngIf="type === 'entrant'">
+  <b>Expéditeur :</b> {{ selectedDoc?.nomExpediteur || '—' }}
+</p>
+
+<p *ngIf="type === 'sortant'">
+  <b>Destinataire :</b> {{ selectedDoc?.nomDestinataire || '—' }}
+</p>
 
         <p>
           <b>Mode :</b>
@@ -69,10 +75,14 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeViewModal()">
-          Fermer
-        </button>
-      </div>
+  <button class="btn btn-outline-secondary" (click)="imprimerBordereau()">
+    <i class="material-icons" style="vertical-align:middle;">print</i> Imprimer bordereau
+  </button>
+  <button class="btn btn-secondary" (click)="closeViewModal()">
+    Fermer
+  </button>
+</div>
+    
 
     </div>
   </div>
@@ -92,9 +102,55 @@
   [showSendModal]="showSendModal"
   [document]="selectedDocument"
   [employes]="employes"
-  (close)="showSendModal = false"
+  [type]="type"
+  (close)="closeSendModal()"
+(viewDocumentEvent)="onView($event)"
   (sent)="onTransmissionEnvoyee()">   <!-- ✅ plus de logique d'envoi dans le parent -->
 </app-send-courrier>
 
+  </div>
+</div>
+
+<!-- BORDEREAU IMPRESSION UNIQUEMENT -->
+<div id="bordereau-print" *ngIf="selectedDoc">
+  <div class="text-center mb-4">
+    <h4>BORDEREAU {{ type === 'entrant' ? "D'ARRIVÉE" : "DE DÉPART" }}</h4>
+    <p>Système de Gestion du Bureau d'Ordre</p>
+    <p>Édité le : {{ today | date:'dd/MM/yyyy' }}</p>
+  </div>
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr><td><b>Numéro d'ordre</b></td><td>{{ selectedDoc?.numeroOrdre || '—' }}</td></tr>
+      <tr>
+        <td><b>Date {{ type === 'entrant' ? 'de réception' : "d'émission" }}</b></td>
+        <td>{{ (type === 'entrant' ? selectedDoc?.dateReception : selectedDoc?.dateEmission) | date:'dd/MM/yyyy' }}</td>
+      </tr>
+      <tr><td><b>Date de saisie</b></td><td>{{ selectedDoc?.dateSaisie | date:'dd/MM/yyyy' }}</td></tr>
+      <tr>
+        <td><b>{{ type === 'entrant' ? 'Expéditeur' : 'Destinataire' }}</b></td>
+        <td>{{ type === 'entrant' ? (selectedDoc?.nomExpediteur || '—') : (selectedDoc?.nomDestinataire || '—') }}</td>
+      </tr>
+      <tr><td><b>Référence</b></td><td>{{ selectedDoc?.reference || '—' }}</td></tr>
+      <tr><td><b>Nature</b></td><td>{{ selectedDoc?.nature || '—' }}</td></tr>
+      <tr><td><b>Type de document</b></td><td>{{ selectedDoc?.typeDocument || '—' }}</td></tr>
+      <tr>
+        <td><b>Mode {{ type === 'entrant' ? 'de réception' : "d'expédition" }}</b></td>
+        <td>{{ type === 'entrant' ? (selectedDoc?.modeReception || '—') : (selectedDoc?.modeExpedition || '—') }}</td>
+      </tr>
+      <tr><td><b>Priorité</b></td><td>{{ selectedDoc?.priorite || '—' }}</td></tr>
+      <tr><td><b>Statut</b></td><td>{{ selectedDoc?.statut || '—' }}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-between mt-5">
+    <div class="text-center">
+      <p>Le Responsable du Bureau d'Ordre</p>
+      <div style="border-top:1px solid #000; width:200px; margin:auto;"></div>
+    </div>
+    <div class="text-center">
+      <p>{{ type === 'entrant' ? "L'Expéditeur" : "Le Destinataire" }}</p>
+      <div style="border-top:1px solid #000; width:200px; margin:auto;"></div>
+    </div>
   </div>
 </div>

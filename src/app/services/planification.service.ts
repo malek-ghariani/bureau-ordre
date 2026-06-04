@@ -2,56 +2,42 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Planification } from '../models/planification.model';
+import { ApiResponse } from '../models/ApiResponse.model';
 
-const API = 'http://localhost:8080/api/planifications';
 
-@Injectable({
-  providedIn: 'root'
-})
+
+@Injectable({ providedIn: 'root' })
 export class PlanificationService {
+  private api = 'http://localhost:8080/api/planifications';
 
   constructor(private http: HttpClient) {}
 
-  // GET ALL
-  getAll(): Observable<Planification[]> {
-    return this.http.get<Planification[]>(API);
-  }
-
-  // GET BY ID
-  getById(id: number): Observable<Planification> {
-    return this.http.get<Planification>(`${API}/${id}`);
-  }
-
-  // CREATE
-  create(data: Planification): Observable<Planification> {
-    return this.http.post<Planification>(API, data);
-  }
-
-  // UPDATE
-  update(id: number, data: Planification): Observable<Planification> {
-    return this.http.put<Planification>(`${API}/${id}`, data);
-  }
-
-  // DELETE
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${API}/${id}`);
-  }
-
-  // EMPLOYÉ : récupérer les planifications par destinataire
-  getByDestinataire(id: number): Observable<any> {
-  return this.http.get(`${API}/employe/${id}`);
+ getAll(): Observable<any[]> {
+  return this.http.get<any[]>(this.api);
 }
 
-  // REPONDRE
-  repondre(id: number, resultat: string, message: string) {
-    const body = { resultat, message };
-    return this.http.put(`${API}/${id}/repondre`, body);
+  getById(id: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.api}/${id}`);
   }
-  // L'URL pointe vers PieceJointeController, pas PlanificationController
-telechargerPieceJointe(id: number): Observable<Blob> {
-  return this.http.get(`http://localhost:8080/api/pieces-jointes/download/${id}`, {
-    responseType: 'blob',
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  });
+
+  update(id: number, data: any): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.api}/${id}`, data);
+  }
+
+  delete(id: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.api}/${id}`);
+  }
+
+  // ← plus d'id dans l'URL, le token JWT identifie l'agent
+ getMesPlanifications(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.api}/mes-planifications`);
 }
+
+  repondre(id: number, data: { commentaireResultat: string, resultat: string }): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.api}/${id}/repondre`, data);
+  }
+
+  changerStatut(id: number, statut: string): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.api}/${id}/changer-statut?statut=${statut}`, {});
+  }
 }

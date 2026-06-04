@@ -21,6 +21,7 @@ import { FormulairePlanificationComponent } from './planification/formulaire-pla
 import { PlanificationComponent } from './planification/planification.component';
 import { PlanificationEmployeComponent } from './planification/planification-employe/planification-employe.component';
 
+
 @NgModule({
   imports: [
     CommonModule,
@@ -43,7 +44,8 @@ import { PlanificationEmployeComponent } from './planification/planification-emp
     ListePlanificationsComponent,
     FormulairePlanificationComponent,
     PlanificationComponent,
-    PlanificationEmployeComponent
+    PlanificationEmployeComponent,
+    
   ],
   exports: [
     CourrierEntrantComponent,

@@ -2,13 +2,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiResponse } from '../models/ApiResponse.model';
 
 export interface EmployeDTO {
   id?: number;
   matricule: string;
   nom: string;
   email: string;
-  password: string;
+  password?: string;
   telephone?: string;
   poste?: string;
   departementCode?: string;
@@ -17,11 +18,7 @@ export interface EmployeDTO {
   enabled?: boolean;
 }
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-}
+
 
 @Injectable({
   providedIn: 'root'
@@ -52,9 +49,9 @@ export class EmployeService {
   }
 
   // DELETE /api/employes/{id}
-  delete(id: number): Observable<ApiResponse> {
-    return this.http.delete<ApiResponse>(`${this.baseUrl}/${id}`);
-  }
+  delete(id: number): Observable<ApiResponse<any>> {  // ← ajoute <any>
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/${id}`);
+}
 
   // GET /api/employes/departement/{code}
   getByDepartement(code: string): Observable<ApiResponse<EmployeDTO[]>> {

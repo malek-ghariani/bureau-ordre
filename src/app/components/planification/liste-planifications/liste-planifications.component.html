@@ -2,9 +2,7 @@
 
   <h2>Liste des planifications</h2>
 
-  <button class="btn btn-primary mb-3" (click)="create()">
-    + Nouvelle planification
-  </button>
+  
 
   <table class="table table-bordered table-striped" *ngIf="planifications.length > 0">
 
@@ -26,11 +24,14 @@
         <td>{{ p.destinataireNom }}</td>
 
         <!-- État -->
-        <td>
-  <span class="badge bg-primary" *ngIf="p.statut === 'ENVOYE'">Envoyé</span>
-  <span class="badge bg-info" *ngIf="p.statut === 'LU'">Lu</span>
-  <span class="badge bg-warning" *ngIf="p.statut === 'TRAITE'">Traité</span>
-  <span class="badge bg-success" *ngIf="p.statut === 'REPONDU'">Répondu</span>
+<td>
+  <span class="badge bg-success" *ngIf="p.statut !== 'EN_ATTENTE'">
+    Répondu
+  </span>
+
+  <span class="badge bg-primary" *ngIf="p.statut === 'EN_ATTENTE'">
+    En attente
+  </span>
 </td>
 
         <!-- Actions -->
@@ -44,13 +45,6 @@
   Réponse
 </button>
 
-          <button class="btn btn-sm btn-secondary ms-1" (click)="edit(p)">
-            Modifier
-          </button>
-
-          <button class="btn btn-sm btn-danger ms-1" (click)="delete(p.id)">
-  Supprimer
-</button>
 
         </td>
 
@@ -85,11 +79,7 @@
 
             <p><strong>Envoyé à :</strong> {{ selectedPlanification.destinataireNom }}</p>
 
-            <p><strong>État :</strong>
-              <span class="badge bg-warning" *ngIf="selectedPlanification.statut === 'EN_ATTENTE'">En attente</span>
-              <span class="badge bg-primary" *ngIf="selectedPlanification.statut === 'EN_COURS'">En cours</span>
-              <span class="badge bg-success" *ngIf="selectedPlanification.statut === 'TERMINEE'">Terminée</span>
-            </p>
+          
 
             <p><strong>Date échéance :</strong>
               {{ selectedPlanification.dateEcheance | date:'dd/MM/yyyy' }}
@@ -113,9 +103,14 @@
 
         <!-- Courrier -->
         <p><strong>Courrier :</strong>
-          <span *ngIf="selectedPlanification.courrierId; else noCourrier">
-            ID {{ selectedPlanification.courrierId }}
-          </span>
+          <span *ngIf="selectedPlanification.courrierEntrantId || selectedPlanification.courrierSortantId; else noCourrier">
+  <span *ngIf="selectedPlanification.courrierEntrantId">
+    Entrant #{{ selectedPlanification.courrierEntrantId }}
+  </span>
+  <span *ngIf="selectedPlanification.courrierSortantId">
+    Sortant #{{ selectedPlanification.courrierSortantId }}
+  </span>
+</span>
 
           <ng-template #noCourrier>
             Aucun courrier associé
@@ -176,9 +171,9 @@
           <strong>Message :</strong>
         </p>
 
-        <div class="border p-2 bg-light">
-          {{ selectedReponse?.message || 'Aucun message' }}
-        </div>
+       <div class="border p-2 bg-light">
+  {{ selectedReponse?.commentaireResultat || 'Aucun message' }}
+</div>
 
       </div>
 
