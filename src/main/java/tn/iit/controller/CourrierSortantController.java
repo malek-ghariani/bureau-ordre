@@ -1,9 +1,6 @@
 package tn.iit.controller;
 
-import java.security.Principal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,175 +10,94 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import tn.iit.dto.ApiResponse;
+import tn.iit.dto.CourrierEntrantDTO;
 import tn.iit.dto.CourrierSortantDTO;
+import tn.iit.entity.CourrierEntrant;
 import tn.iit.entity.CourrierSortant;
-import tn.iit.entity.Employe;
-import tn.iit.entity.EtatCourrier;
-import tn.iit.entity.ModeExpedition;
-import tn.iit.entity.Priorite;
 import tn.iit.entity.StatutCourrier;
-import tn.iit.mapper.CourrierMapper;
-import tn.iit.service.CompteurService;
 import tn.iit.service.CourrierSortantService;
-import tn.iit.service.EmployeService;
+
 
 @RestController
 @RequestMapping("/api/courriers-sortants")
 @RequiredArgsConstructor
 public class CourrierSortantController {
 
-    private final CourrierSortantService courrierSortantService;
-    private final CompteurService compteurService;
-    private final CourrierMapper courrierMapper;
-    private final EmployeService employeService;
+    private final CourrierSortantService service;
+   
 
-    
-    @GetMapping("/mes-courriers")
-    public ResponseEntity<ApiResponse> getMesCourriers(Principal principal) {
-        Employe employe = employeService.findByUsername(principal.getName());
-
-        List<CourrierSortantDTO> courriers = courrierSortantService
-                .findByEmploye(employe)
-                .stream()
-                .map(courrierMapper::toDTO)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(ApiResponse.success("Vos courriers sortants", courriers));
+    /* ================= GET ALL ================= */
+    @GetMapping
+    public ResponseEntity<ApiResponse> getAll() {
+        return ResponseEntity.ok(
+                ApiResponse.success("Liste", service.getAll())
+        );
     }
 
-    /* ===========================
-        CRÉATION
-       =========================== */
+    /* ================= CREATE ================= */
     @PostMapping
-    public ResponseEntity<ApiResponse> createCourrierSortant(
-            @Valid @RequestBody CourrierSortantDTO dto,
-            Principal principal) {
+    public ResponseEntity<ApiResponse> create(@RequestBody CourrierSortantDTO dto) {
 
-        try {
-            String numeroOrdre = compteurService.genererNumero("CS");
-
-            CourrierSortant entity = courrierMapper.toEntity(dto);
-            entity.setNumeroOrdre(numeroOrdre);
-
-            // Statut et etat gérés par l’entity → ne rien modifier
-            entity.setDateSaisie(LocalDate.now());
-
-            // Employé connecté
-            Employe employe = employeService.findByUsername(principal.getName());
-            entity.setEmploye(employe);
-
-            CourrierSortant saved = courrierSortantService.save(entity);
-
-            return ResponseEntity.ok(
-                    ApiResponse.success("Courrier sortant créé avec succès", courrierMapper.toDTO(saved))
-            );
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
-        }
+        return ResponseEntity.ok(
+                ApiResponse.success("Créé", service.create(dto))
+        );
+    }
+    
+    @GetMapping("/archives")
+    public ResponseEntity<ApiResponse> archives() {
+        return ResponseEntity.ok(
+                ApiResponse.success("Archives", service.getArchives())
+        );
     }
 
-    /* ===========================
-        GET BY ID (sécurisé)
-       =========================== */
+    /* ================= GET BY ID ================= */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getCourrierSortantById(
-            @PathVariable Long id,
-            Principal principal) {
-
-        Employe employe = employeService.findByUsername(principal.getName());
-
-        return courrierSortantService.findById(id)
-                .filter(c -> c.getEmploye().getId().equals(employe.getId()))
-                .map(c -> ResponseEntity.ok(
-                        ApiResponse.success("Courrier trouvé", courrierMapper.toDTO(c))
-                ))
-                .orElse(ResponseEntity.badRequest().body(ApiResponse.error("Accès refusé ou courrier introuvable")));
+    public ResponseEntity<ApiResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                ApiResponse.success("OK", service.findById(id))
+        );
     }
 
-    /* ===========================
-        UPDATE (sécurisé)
-       =========================== */
+    /* ================= UPDATE ================= */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateCourrierSortant(
-            @PathVariable Long id,
-            @Valid @RequestBody CourrierSortantDTO dto,
-            Principal principal) {
+    public ResponseEntity<ApiResponse> update(@PathVariable Long id,
+                                             @RequestBody CourrierSortantDTO dto) {
 
-        Employe employe = employeService.findByUsername(principal.getName());
-
-        return courrierSortantService.findById(id)
-                .filter(c -> c.getEmploye().getId().equals(employe.getId()))
-                .map(existing -> {
-
-                    // ❌ Blocage si transmis
-                    if (!existing.getTransmissions().isEmpty()) {
-                        return ResponseEntity.badRequest()
-                                .body(ApiResponse.error("Impossible de modifier : courrier déjà transmis"));
-                    }
-
-                    existing.setDateEmission(dto.getDateEmission());
-                    existing.setTypeDocument(dto.getTypeDocument());
-                    existing.setReference(dto.getReference());
-                    existing.setNature(dto.getNature());
-                    existing.setDestinataire(dto.getDestinataire());
-
-                    // Enums
-                    existing.setModeExpedition(ModeExpedition.valueOf(dto.getModeExpedition()));
-                    existing.setStatut(StatutCourrier.valueOf(dto.getStatut()));
-                    existing.setPriorite(Priorite.valueOf(dto.getPriorite()));
-
-                    existing.setAdresseLivraison(dto.getAdresseLivraison());
-                    existing.setEmailDestinataire(dto.getEmailDestinataire());
-
-                    CourrierSortant updated = courrierSortantService.save(existing);
-
-                    return ResponseEntity.ok(ApiResponse.success(
-                            "Courrier sortant modifié avec succès", courrierMapper.toDTO(updated)
-                    ));
-                })
-                .orElse(ResponseEntity.badRequest().body(ApiResponse.error("Accès refusé ou courrier introuvable")));
+        return ResponseEntity.ok(
+                ApiResponse.success("Modifié", service.update(id, dto))
+        );
     }
 
-    /* ===========================
-        DELETE (sécurisé)
-       =========================== */
+    /* ================= DELETE ================= */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteCourrierSortant(
-            @PathVariable Long id,
-            Principal principal) {
-
-        Employe employe = employeService.findByUsername(principal.getName());
-
-        return courrierSortantService.findById(id)
-            .filter(c -> c.getEmploye().getId().equals(employe.getId()))
-            .map(courrier -> {
-
-                // ❌ Empêcher suppression si transmissions
-                if (!courrier.getTransmissions().isEmpty()) {
-                    return ResponseEntity.badRequest()
-                            .body(ApiResponse.error("Impossible de supprimer : courrier déjà transmis"));
-                }
-
-                // ✔ Soft delete via état
-                courrier.setEtat(EtatCourrier.SUPPRIME);
-                courrierSortantService.save(courrier);
-
-                return ResponseEntity.ok(ApiResponse.success("Courrier supprimé"));
-            })
-            .orElse(ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Courrier non trouvé ou accès refusé")));
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Supprimé"));
     }
-    @PutMapping("/{id}/assigner/{employeId}")
-    public ResponseEntity<CourrierSortant> assignerEmploye(
+    // 7. STATUT
+    @PutMapping("/{id}/statut")
+    public ResponseEntity<ApiResponse> changerStatut(
             @PathVariable Long id,
-            @PathVariable Long employeId) {
-        return ResponseEntity.ok(courrierSortantService.assignerEmploye(id, employeId));
+            @RequestParam String statut) {
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Statut modifié", service.changeStatut(id, statut))
+        );
     }
 
+    /* ================= ARCHIVER ================= */
+    @PutMapping("/{id}/archiver")
+    public ResponseEntity<ApiResponse> archiver(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                ApiResponse.success("Archivé", service.archiver(id))
+        );
+    }
+
+  
 }

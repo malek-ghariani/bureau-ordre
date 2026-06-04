@@ -1,95 +1,153 @@
 package tn.iit.service;
 
-import tn.iit.entity.CourrierSortant;
-import tn.iit.entity.Employe;
-import tn.iit.entity.StatutCourrier;
-import tn.iit.repository.CourrierSortantRepository;
-import tn.iit.repository.EmployeRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-import java.util.Optional;
+import tn.iit.dto.ArchiveSortantDTO;
+import tn.iit.dto.CourrierEntrantDTO;
+import tn.iit.dto.CourrierSortantDTO;
+import tn.iit.entity.CourrierEntrant;
+import tn.iit.entity.CourrierSortant;
+
+import tn.iit.entity.EtatCourrier;
+import tn.iit.entity.ModeExpedition;
+import tn.iit.entity.Priorite;
+import tn.iit.entity.StatutCourrier;
+import tn.iit.entity.Tiers;
+import tn.iit.mapper.CourrierMapper;
+import tn.iit.repository.CourrierSortantRepository;
+import tn.iit.repository.TiersRepository;
+
 
 @Service
 @RequiredArgsConstructor
 public class CourrierSortantService {
 
-	private final CourrierSortantRepository courrierSortantRepository;
-	private final EmployeRepository employeRepository;
+    private final CourrierSortantRepository courrierSortantRepository;
+    private final TiersRepository tiersRepository;
+    private final CompteurService compteurService;
+    private final CourrierMapper courrierMapper;
 
-	public List<CourrierSortant> findAll() {
-		return courrierSortantRepository.findAll();
-	}
+    /**
+     * 1. CREATION
+     */
+    public CourrierSortantDTO create(CourrierSortantDTO dto) {
 
-	public Optional<CourrierSortant> findById(Long id) {
-		return courrierSortantRepository.findById(id);
-	}
+        CourrierSortant entity = courrierMapper.toEntity(dto);
 
-	public Optional<CourrierSortant> findByNumeroOrdre(String numeroOrdre) {
-		return courrierSortantRepository.findByNumeroOrdre(numeroOrdre);
-	}
+        // génération du numéro
+        String numero = compteurService.genererNumero("CS");
+        entity.setNumeroOrdre(numero);
 
-	public CourrierSortant save(CourrierSortant courrierSortant) {
-		return courrierSortantRepository.save(courrierSortant);
-	}
+        // valeurs par défaut
+        entity.setStatut(StatutCourrier.NOUVEAU);
+        entity.setEtat(EtatCourrier.ACTIVE);
 
-	public void deleteById(Long id) {
-		courrierSortantRepository.deleteById(id);
-	}
+        // destinataire
+        if (dto.getDestinataireId() != null) {
+            Tiers tiers = tiersRepository.findById(dto.getDestinataireId())
+                    .orElseThrow(() -> new RuntimeException("Tiers introuvable"));
+            entity.setDestinataire(tiers);
+        }
 
-	public List<CourrierSortant> findByDepartementEmetteur(String codeDepartement) {
-		return courrierSortantRepository.findByDepartementEmetteurCode(codeDepartement);
-	}
+        CourrierSortant saved = courrierSortantRepository.save(entity);
 
-	public List<CourrierSortant> findByStatut(String statut) {
-		return courrierSortantRepository.findByStatut(statut);
-	}
+        return courrierMapper.toDTO(saved);
+    }
 
-	public List<CourrierSortant> findByModeExpedition(String modeExpedition) {
-		return courrierSortantRepository.findByModeExpedition(modeExpedition);
-	}
+    /**
+     * 2. MODIFICATION
+     */
+ 
+    public CourrierSortantDTO update(Long id, CourrierSortantDTO dto) {
 
-	public List<CourrierSortant> findByDestinataire(String destinataire) {
-		return courrierSortantRepository.findByDestinataireContainingIgnoreCase(destinataire);
-	}
+        CourrierSortant existing = courrierSortantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Courrier introuvable"));
 
-	public List<CourrierSortant> findByDateEmissionBetween(LocalDate startDate, LocalDate endDate) {
-		return courrierSortantRepository.findByDateEmissionBetween(startDate, endDate);
-	}
+        // mise à jour des champs
+        existing.setNumeroOrdre(dto.getNumeroOrdre());
+        existing.setDateExpedition(dto.getDateExpedition());
+        existing.setTypeDocument(dto.getTypeDocument());
+        existing.setReference(dto.getReference());
+        existing.setNature(dto.getNature());
 
-	public List<CourrierSortant> findByTiers(Long tiersId) {
-		return courrierSortantRepository.findByTiersId(tiersId);
-	}
+        if (dto.getModeExpedition() != null)
+            existing.setModeExpedition(ModeExpedition.valueOf(dto.getModeExpedition()));
 
-	public List<CourrierSortant> findByReference(String reference) {
-		return courrierSortantRepository.findByReferenceContaining(reference);
-	}
+        if (dto.getPriorite() != null)
+            existing.setPriorite(Priorite.valueOf(dto.getPriorite()));
 
-	public List<CourrierSortant> findByNature(String nature) {
-		return courrierSortantRepository.findByNatureContaining(nature);
-	}
+        
+        if (dto.getDestinataireId() != null) {
+            Tiers tiers = tiersRepository.findById(dto.getDestinataireId())
+                    .orElseThrow(() -> new RuntimeException("Tiers introuvable"));
+            existing.setDestinataire(tiers);
+        }
 
-	public Long countCourriersByDate(LocalDate date) {
-		return courrierSortantRepository.countByDateEmission(date);
-	}
+        CourrierSortant updated = courrierSortantRepository.save(existing);
 
-	public List<CourrierSortant> findByEmploye(Employe employe) {
-		return courrierSortantRepository.findByEmploye(employe);
-	}
+        return courrierMapper.toDTO(updated);
+    }
 
-	public CourrierSortant assignerEmploye(Long courrierId, Long employeId) {
-		CourrierSortant courrier = courrierSortantRepository.findById(courrierId)
-				.orElseThrow(() -> new RuntimeException("Courrier introuvable"));
+    /**
+     * 3. LISTE
+     */
+    public List<CourrierSortantDTO> getAll() {
+        return courrierSortantRepository.findAll()
+                .stream()
+                .map(courrierMapper::toDTO)
+                .collect(Collectors.toList()); // version ancienne
+    }
 
-		Employe employe = employeRepository.findById(employeId)
-				.orElseThrow(() -> new RuntimeException("Employé introuvable"));
+    /**
+     * 4. ARCHIVER
+     */
+    public CourrierSortantDTO archiver(Long id) {
 
-		courrier.setEmploye(employe);
-		courrier.setStatut(StatutCourrier.EN_COURS);
-		return courrierSortantRepository.save(courrier);
-	}
+        CourrierSortant entity = courrierSortantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Courrier introuvable"));
 
+        entity.setEtat(EtatCourrier.ARCHIVE);
+        entity.setDateArchivage(LocalDateTime.now());
+
+        CourrierSortant saved = courrierSortantRepository.save(entity);
+
+        return courrierMapper.toDTO(saved);
+    }
+    // ARCHIVES
+    public List<ArchiveSortantDTO> getArchives() {
+        return courrierSortantRepository.findByEtat(EtatCourrier.ARCHIVE)
+                .stream()
+                .map(courrierMapper::toArchiveSortantDTO)
+                .collect(Collectors.toList());
+    }
+    public void delete(Long id) {
+        CourrierSortant entity = courrierSortantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Courrier introuvable"));
+
+        courrierSortantRepository.delete(entity);
+    }
+    // STATUT
+    public CourrierSortantDTO changeStatut(Long id, String statut) {
+        CourrierSortant entity = courrierSortantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Courrier introuvable"));
+
+        entity.setStatut(StatutCourrier.valueOf(statut.toUpperCase()));
+
+        return courrierMapper.toDTO(courrierSortantRepository.save(entity));
+    }
+    public CourrierSortantDTO findById(Long id) {
+        return courrierSortantRepository.findById(id)
+                .map(courrierMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Introuvable"));
+    }
+    public CourrierSortant getEntityById(Long id) {
+        return courrierSortantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Courrier sortant introuvable"));
+    }
 }

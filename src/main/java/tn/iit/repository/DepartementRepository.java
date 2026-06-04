@@ -13,5 +13,5 @@ public interface DepartementRepository extends JpaRepository<Departement, String
     List<Departement> findByNomContainingIgnoreCase(String nom);
     boolean existsByCode(String code);
     boolean existsByEmail(String email);
-    List<Departement> findByChefDepartement(String chefDepartement);
+    List<Departement> findByChefDepartementId(Long id);
 }

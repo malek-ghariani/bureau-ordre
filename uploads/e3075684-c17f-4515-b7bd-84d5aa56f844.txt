@@ -1,0 +1,6 @@
+angular est une plateforme javascripte
+CLI command line interface : permet d'ecrire des scripts depuis la lign de commande
+npm -v (verifier l'installation de node js)
+npm install -g latest (installer la dernier version de npm)
+npm install -g @angular/cli (installer angular)
+ng new app-itune (ouvrir un projet angular)

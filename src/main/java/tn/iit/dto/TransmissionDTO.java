@@ -22,13 +22,12 @@ public class TransmissionDTO {
     // 📌 identifiant du courrier lié
     private Long courrierId;
 
-    // 📌 expéditeur et destinataire
-    private Long expediteurId;
+   
     private Long destinataireId;
 
     // 📅 dates utiles
     private LocalDateTime dateEnvoi;
     private LocalDateTime dateLecture;
     
-    private List<Long> pieceJointeIds;
+    
 }

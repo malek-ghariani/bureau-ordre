@@ -1,14 +1,17 @@
 package tn.iit.mapper;
 
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
-import tn.iit.dto.CourrierDTO;
+import tn.iit.dto.ArchiveEntrantDTO;
+import tn.iit.dto.ArchiveSortantDTO;
 import tn.iit.dto.CourrierEntrantDTO;
 import tn.iit.dto.CourrierSortantDTO;
+import tn.iit.dto.PieceJointeDTO;
+import tn.iit.dto.TransmissionArchiveDTO;
 import tn.iit.entity.CourrierEntrant;
 import tn.iit.entity.CourrierSortant;
-import tn.iit.entity.Departement;
-import tn.iit.entity.Employe;
 import tn.iit.entity.EtatCourrier;
 import tn.iit.entity.ModeExpedition;
 import tn.iit.entity.ModeReception;
@@ -19,193 +22,259 @@ import tn.iit.entity.Tiers;
 @Component
 public class CourrierMapper {
 
-	/*
-	 * ======================= COURRIER ENTRANT =======================
-	 */
+    /*
+     * ======================= COURRIER ENTRANT =======================
+     */
 
 	public CourrierEntrantDTO toDTO(CourrierEntrant courrier) {
-		if (courrier == null)
-			return null;
+	    if (courrier == null)
+	        return null;
 
-		CourrierEntrantDTO dto = new CourrierEntrantDTO();
-		dto.setId(courrier.getId());
-		dto.setNumeroOrdre(courrier.getNumeroOrdre());
-		dto.setDateReception(courrier.getDateReception());
-		dto.setDateSaisie(courrier.getDateSaisie()); // ✅ lecture uniquement
-		dto.setTypeDocument(courrier.getTypeDocument());
-		dto.setReference(courrier.getReference());
-		dto.setNature(courrier.getNature());
-		dto.setExpediteur(courrier.getExpediteur());
-		dto.setModeReception(courrier.getModeReception().name());
-		dto.setStatut(courrier.getStatut().name());
-		dto.setEtat(courrier.getEtat().name());
-		dto.setPriorite(courrier.getPriorite().name());
+	    CourrierEntrantDTO dto = new CourrierEntrantDTO();
+	    dto.setId(courrier.getId());
+	    dto.setNumeroOrdre(courrier.getNumeroOrdre());
+	    dto.setDateReception(courrier.getDateReception());
+	    dto.setDateSaisie(courrier.getDateSaisie());
+	    dto.setTypeDocument(courrier.getTypeDocument());
+	    dto.setReference(courrier.getReference());
+	    dto.setNature(courrier.getNature());
+	    dto.setDateArchivage(courrier.getDateArchivage());
 
-		if (courrier.getTiers() != null) {
-			dto.setTiersId(courrier.getTiers().getId());
-			dto.setNomTiers(courrier.getTiers().getNom());
-		}
+	    // Enums → String (protection null car champs nullable)
+	    if (courrier.getModeReception() != null)
+	        dto.setModeReception(courrier.getModeReception().name());
+	    if (courrier.getStatut() != null)
+	        dto.setStatut(courrier.getStatut().name());
+	    if (courrier.getEtat() != null)
+	        dto.setEtat(courrier.getEtat().name());
+	    if (courrier.getPriorite() != null)
+	        dto.setPriorite(courrier.getPriorite().name());
 
-		if (courrier.getDepartementDestinataire() != null) {
-			dto.setDepartementDestinataireCode(courrier.getDepartementDestinataire().getCode());
-			dto.setNomDepartementDestinataire(courrier.getDepartementDestinataire().getNom());
-		}
+	    // Expéditeur externe (Tiers)
+	    if (courrier.getExpediteur() != null) {
+	        dto.setExpediteurId(courrier.getExpediteur().getId());
+	        dto.setNomExpediteur(courrier.getExpediteur().getNom());
+	    }
 
-		if (courrier.getEmploye() != null) {
-			dto.setCreatedByMatricule(courrier.getEmploye().getMatricule());
-		}
+	    
 
-		return dto;
+	    return dto;
 	}
 
 	public CourrierEntrant toEntity(CourrierEntrantDTO dto) {
-		if (dto == null)
-			return null;
+	    if (dto == null)
+	        return null;
 
-		CourrierEntrant entity = new CourrierEntrant();
-		entity.setId(dto.getId());
-		entity.setDateReception(dto.getDateReception());
-		entity.setTypeDocument(dto.getTypeDocument());
-		entity.setReference(dto.getReference());
-		entity.setNature(dto.getNature());
-		entity.setExpediteur(dto.getExpediteur());
-		entity.setModeReception(ModeReception.valueOf(dto.getModeReception()));
-		entity.setStatut(StatutCourrier.valueOf(dto.getStatut()));
-		entity.setEtat(EtatCourrier.valueOf(dto.getEtat()));
-		entity.setPriorite(Priorite.valueOf(dto.getPriorite()));
+	    CourrierEntrant entity = new CourrierEntrant();
+	    entity.setId(dto.getId());
+	    entity.setDateReception(dto.getDateReception());
+	    entity.setTypeDocument(dto.getTypeDocument());
+	    entity.setReference(dto.getReference());
+	    entity.setNature(dto.getNature());
 
-		if (dto.getDepartementDestinataireCode() != null) {
-			Departement dep = new Departement();
-			dep.setCode(dto.getDepartementDestinataireCode());
-			entity.setDepartementDestinataire(dep);
-		}
+	    // Enums → avec protection null
+	    if (dto.getModeReception() != null)
+	        entity.setModeReception(ModeReception.valueOf(dto.getModeReception()));
+	    if (dto.getStatut() != null)
+	        entity.setStatut(StatutCourrier.valueOf(dto.getStatut()));
+	    if (dto.getEtat() != null)
+	        entity.setEtat(EtatCourrier.valueOf(dto.getEtat()));
+	    if (dto.getPriorite() != null)
+	        entity.setPriorite(Priorite.valueOf(dto.getPriorite()));
 
-		if (dto.getTiersId() != null) {
-			Tiers tiers = new Tiers();
-			tiers.setId(dto.getTiersId());
-			entity.setTiers(tiers);
-		}
+	    // Expéditeur externe (Tiers) — stub suffisant, le service charge l'objet complet
+	    if (dto.getExpediteurId() != null) {
+	        Tiers tiers = new Tiers();
+	        tiers.setId(dto.getExpediteurId());
+	        entity.setExpediteur(tiers);
+	    }
 
-		if (dto.getCreatedByMatricule() != null) {
-			Employe emp = new Employe();
-			emp.setMatricule(dto.getCreatedByMatricule());
-			entity.setEmploye(emp);
-		}
+	    // dateSaisie, saisiPar, numeroOrdre → jamais mappés depuis le DTO
+	    // ils sont gérés côté serveur (@PrePersist et Principal)
 
-		return entity;
+	    return entity;
+	}
+	public ArchiveEntrantDTO toArchiveEntrantDTO(CourrierEntrant entity) {
+	    if (entity == null)
+	        return null;
+
+	    ArchiveEntrantDTO dto = new ArchiveEntrantDTO();
+	    dto.setId(entity.getId());
+	    dto.setNumeroOrdre(entity.getNumeroOrdre());
+	    dto.setReference(entity.getReference());
+	    dto.setDateReception(entity.getDateReception());
+	    dto.setDateArchivage(entity.getDateArchivage());
+	    dto.setNature(entity.getNature());
+
+	    // Priorité enum → String
+	    if (entity.getPriorite() != null)
+	        dto.setPriorite(entity.getPriorite().name());
+
+	    // Expéditeur externe
+	    if (entity.getExpediteur() != null)
+	        dto.setExpediteur(entity.getExpediteur().getNom());
+
+	    // 🔥 Transmissions (avec tes classes réelles)
+	    if (entity.getTransmissions() != null) {
+	        dto.setTransmissions(
+	            entity.getTransmissions().stream()
+	                .map(t -> {
+	                    TransmissionArchiveDTO tDto = new TransmissionArchiveDTO();
+	                    tDto.setId(t.getId());
+	                    tDto.setMessage(t.getMessage());
+	                    tDto.setDateEnvoi(t.getDateEnvoi());
+	                    tDto.setDestinataireNom(t.getDestinataire().getNom());
+	                    return tDto;
+	                })
+	                .collect(Collectors.toList())
+	        );
+	    
+
+	    // pièces jointes
+	    dto.setPiecesJointes(
+	    	    entity.getPiecesJointes().stream()
+	    	        .map(p -> {
+	    	            PieceJointeDTO pDto = new PieceJointeDTO();
+	    	            pDto.setId(p.getId());
+	    	            pDto.setNomFichier(p.getNomFichier());
+	    	            return pDto;
+	    	        })
+	    	        .collect(Collectors.toList())
+	    	);
+	    }
+
+	    return dto;
 	}
 
-	/*
-	 * ======================= COURRIER SORTANT =======================
-	 */
+    /*
+     * ======================= COURRIER SORTANT =======================
+     */
 
 	public CourrierSortantDTO toDTO(CourrierSortant courrier) {
-		if (courrier == null)
-			return null;
+	    if (courrier == null)
+	        return null;
 
-		CourrierSortantDTO dto = new CourrierSortantDTO();
-		dto.setId(courrier.getId());
-		dto.setNumeroOrdre(courrier.getNumeroOrdre());
-		dto.setDateEmission(courrier.getDateEmission());
-		dto.setDateSaisie(courrier.getDateSaisie()); // ✅ lecture uniquement
-		dto.setTypeDocument(courrier.getTypeDocument());
-		dto.setReference(courrier.getReference());
-		dto.setNature(courrier.getNature());
-		dto.setDestinataire(courrier.getDestinataire());
-		dto.setModeExpedition(courrier.getModeExpedition().name());
-		dto.setStatut(courrier.getStatut().name());
-		dto.setEtat(courrier.getEtat().name());
-		dto.setPriorite(courrier.getPriorite().name());
-		dto.setAdresseLivraison(courrier.getAdresseLivraison());
-		dto.setEmailDestinataire(courrier.getEmailDestinataire());
+	    CourrierSortantDTO dto = new CourrierSortantDTO();
+	    dto.setId(courrier.getId());
+	    dto.setNumeroOrdre(courrier.getNumeroOrdre());
+	    dto.setDateEmission(courrier.getDateEmission());
+	    dto.setDateSaisie(courrier.getDateSaisie());
+	    dto.setTypeDocument(courrier.getTypeDocument());
+	    dto.setReference(courrier.getReference());
+	    dto.setNature(courrier.getNature());
+	    dto.setDateArchivage(courrier.getDateArchivage());
+	    dto.setDateExpedition(courrier.getDateExpedition());
 
-		if (courrier.getTiers() != null) {
-			dto.setTiersId(courrier.getTiers().getId());
-			dto.setNomTiers(courrier.getTiers().getNom());
-		}
+	    // Enums → String
+	    if (courrier.getModeExpedition() != null)
+	        dto.setModeExpedition(courrier.getModeExpedition().name());
+	    if (courrier.getStatut() != null)
+	        dto.setStatut(courrier.getStatut().name());
+	    if (courrier.getEtat() != null)
+	        dto.setEtat(courrier.getEtat().name());
+	    if (courrier.getPriorite() != null)
+	        dto.setPriorite(courrier.getPriorite().name());
 
-		if (courrier.getDepartementEmetteur() != null) {
-			dto.setDepartementEmetteurCode(courrier.getDepartementEmetteur().getCode());
-			dto.setNomDepartementEmetteur(courrier.getDepartementEmetteur().getNom());
-		}
+	    // Destinataire externe (Tiers)
+	    if (courrier.getDestinataire() != null) {
+	        dto.setDestinataireId(courrier.getDestinataire().getId());
+	        dto.setNomDestinataire(courrier.getDestinataire().getNom());
+	       
+	    }
 
-		if (courrier.getEmploye() != null) {
-			dto.setCreatedByMatricule(courrier.getEmploye().getMatricule());
-		}
+	   
 
-		return dto;
+	    return dto;
 	}
 
 	public CourrierSortant toEntity(CourrierSortantDTO dto) {
-		if (dto == null)
-			return null;
+	    if (dto == null)
+	        return null;
 
-		CourrierSortant entity = new CourrierSortant();
-		entity.setId(dto.getId());
-		entity.setDateEmission(dto.getDateEmission());
-		entity.setTypeDocument(dto.getTypeDocument());
-		entity.setReference(dto.getReference());
-		entity.setNature(dto.getNature());
-		entity.setDestinataire(dto.getDestinataire());
-		entity.setModeExpedition(ModeExpedition.valueOf(dto.getModeExpedition()));
-		entity.setStatut(StatutCourrier.valueOf(dto.getStatut()));
-		entity.setEtat(EtatCourrier.valueOf(dto.getEtat()));
-		entity.setPriorite(Priorite.valueOf(dto.getPriorite()));
-		entity.setAdresseLivraison(dto.getAdresseLivraison());
-		entity.setEmailDestinataire(dto.getEmailDestinataire());
+	    CourrierSortant entity = new CourrierSortant();
+	    entity.setId(dto.getId());
+	    entity.setDateEmission(dto.getDateEmission());
+	    entity.setTypeDocument(dto.getTypeDocument());
+	    entity.setReference(dto.getReference());
+	    entity.setNature(dto.getNature());
 
-		if (dto.getTiersId() != null) {
-			Tiers tiers = new Tiers();
-			tiers.setId(dto.getTiersId());
-			entity.setTiers(tiers);
-		}
+	    // Enums → avec protection null
+	    if (dto.getModeExpedition() != null)
+	        entity.setModeExpedition(ModeExpedition.valueOf(dto.getModeExpedition()));
+	    if (dto.getStatut() != null)
+	        entity.setStatut(StatutCourrier.valueOf(dto.getStatut()));
+	    if (dto.getEtat() != null)
+	        entity.setEtat(EtatCourrier.valueOf(dto.getEtat()));
+	    if (dto.getPriorite() != null)
+	        entity.setPriorite(Priorite.valueOf(dto.getPriorite()));
 
-		if (dto.getDepartementEmetteurCode() != null) {
-			Departement dep = new Departement();
-			dep.setCode(dto.getDepartementEmetteurCode());
-			entity.setDepartementEmetteur(dep);
-		}
+	    // Destinataire externe (Tiers) — stub, le service charge l'objet complet
+	    if (dto.getDestinataireId() != null) {
+	        Tiers tiers = new Tiers();
+	        tiers.setId(dto.getDestinataireId());
+	        entity.setDestinataire(tiers);
+	    }
 
-		return entity;
+	    // dateSaisie, saisiPar, numeroOrdre → jamais mappés depuis le DTO
+	    // gérés côté serveur (@PrePersist et Principal)
+
+	    return entity;
 	}
+	public ArchiveSortantDTO toArchiveSortantDTO(CourrierSortant entity) {
+	    if (entity == null)
+	        return null;
 
-	/*
-	 * ======================= MAPPER POUR LISTE UNIQUE =======================
-	 */
+	    ArchiveSortantDTO dto = new ArchiveSortantDTO();
 
-	public CourrierDTO toUnifiedDTO(CourrierEntrant c, String type) {
-		if (c == null)
-			return null;
+	    dto.setId(entity.getId());
+	    dto.setNumeroOrdre(entity.getNumeroOrdre());
+	    dto.setReference(entity.getReference());
+	    dto.setNature(entity.getNature());
+	    dto.setDateEmission(entity.getDateEmission());
+	    dto.setDateExpedition(entity.getDateExpedition());
+	    dto.setDateArchivage(entity.getDateArchivage());
 
-		CourrierDTO dto = new CourrierDTO();
-		dto.setId(c.getId());
-		dto.setNumeroOrdre(c.getNumeroOrdre());
-		dto.setDate(c.getDateReception());
-		dto.setType(type); // "ENTRANT"
-		dto.setReference(c.getReference());
-		dto.setNature(c.getNature());
-		dto.setExpediteur(c.getExpediteur());
-		dto.setStatut(c.getStatut().name());
-		dto.setEtat(c.getEtat().name());
+	    // enums
+	    if (entity.getPriorite() != null)
+	        dto.setPriorite(entity.getPriorite().name());
 
-		return dto;
+	    if (entity.getStatut() != null)
+	        dto.setStatut(entity.getStatut().name());
+
+	    if (entity.getEtat() != null)
+	        dto.setEtat(entity.getEtat().name());
+
+	    // destinataire (tiers)
+	    if (entity.getDestinataire() != null) {
+	        dto.setDestinataire(entity.getDestinataire().getNom());
+	    }
+	    if (entity.getTransmissions() != null) {
+	        dto.setTransmissions(
+	            entity.getTransmissions().stream()
+	                .map(t -> {
+	                    TransmissionArchiveDTO tDto = new TransmissionArchiveDTO();
+	                    tDto.setId(t.getId());
+	                    tDto.setMessage(t.getMessage());
+	                    tDto.setDateEnvoi(t.getDateEnvoi());
+	                    tDto.setDestinataireNom(t.getDestinataire().getNom());
+	                    return tDto;
+	                })
+	                .collect(Collectors.toList())
+	        );
+	    }
+	    if (entity.getPiecesJointes() != null) {
+	        dto.setPiecesJointes(
+	            entity.getPiecesJointes().stream()
+	                .map(p -> {
+	                    PieceJointeDTO pDto = new PieceJointeDTO();
+	                    pDto.setId(p.getId());
+	                    pDto.setNomFichier(p.getNomFichier());
+	                    return pDto;
+	                })
+	                .collect(Collectors.toList())
+	        );
+	    }
+
+	    return dto;
 	}
-
-	public CourrierDTO toUnifiedDTO(CourrierSortant c, String type) {
-		if (c == null)
-			return null;
-
-		CourrierDTO dto = new CourrierDTO();
-		dto.setId(c.getId());
-		dto.setNumeroOrdre(c.getNumeroOrdre());
-		dto.setDate(c.getDateEmission());
-		dto.setType(type); // "SORTANT"
-		dto.setReference(c.getReference());
-		dto.setNature(c.getNature());
-		dto.setStatut(c.getStatut().name());
-		dto.setEtat(c.getEtat().name());
-
-		return dto;
-	}
-
-}
+  }

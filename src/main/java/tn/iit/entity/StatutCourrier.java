@@ -4,5 +4,6 @@ public enum StatutCourrier {
     NOUVEAU,
     EN_COURS,
     TRAITE,
-    REJETE
+    REJETE, 
+    ARCHIVE
 }

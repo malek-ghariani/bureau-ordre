@@ -5,13 +5,15 @@ import lombok.Data;
 
 @Data
 public class DepartementDTO {
-    @NotBlank(message = "Le code est obligatoire")
+
     private String code;
-    
+
     @NotBlank(message = "Le nom est obligatoire")
     private String nom;
-    
-    private String chefDepartement;
+
+    // on stocke l'id du chef (recommandé)
+    private Long chefDepartementId;
+
     private String email;
     private String telephone;
 }

@@ -11,7 +11,7 @@ import java.util.List;
 public interface PieceJointeRepository extends JpaRepository<PieceJointe, Long> {
     List<PieceJointe> findByCourrierEntrantId(Long courrierEntrantId);
     List<PieceJointe> findByCourrierSortantId(Long courrierSortantId);
-    List<PieceJointe> findByUploadedByMatricule(String matricule);
+    
     void deleteByCourrierEntrantId(Long courrierEntrantId);
     void deleteByCourrierSortantId(Long courrierSortantId);
     

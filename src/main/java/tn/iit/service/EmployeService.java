@@ -1,7 +1,8 @@
 package tn.iit.service;
 
 import tn.iit.entity.Employe;
-import tn.iit.entity.Departement;
+import tn.iit.entity.RoleEmploye;
+
 import tn.iit.repository.EmployeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,9 +16,8 @@ import java.util.Optional;
 public class EmployeService {
 
     private final EmployeRepository employeRepository;
-    private final PasswordEncoder passwordEncoder; // 🔹 important pour encoder le mot de passe
+    private final PasswordEncoder passwordEncoder;
 
-    // 🔹 Liste de tous les employés
     public List<Employe> findAll() {
         return employeRepository.findAll();
     }
@@ -34,12 +34,22 @@ public class EmployeService {
         return employeRepository.findByMatricule(matricule);
     }
 
-    // 🔹 Sauvegarder un employé (encode le mot de passe si nouveau)
-    public Employe save(Employe employe) {
-        // Encoder le mot de passe uniquement si ce n'est pas déjà encodé
-        if (employe.getPassword() != null) {
-            employe.setPassword(passwordEncoder.encode(employe.getPassword()));
-        }
+    // ✅ Créer un nouvel employé — encode le mot de passe
+    public Employe create(Employe employe) {
+        employe.setPassword(passwordEncoder.encode(employe.getPassword()));
+        return employeRepository.save(employe);
+    }
+
+    // ✅ Modifier un employé — ne touche pas au mot de passe
+    public Employe update(Employe employe) {
+        return employeRepository.save(employe);
+    }
+
+    // ✅ Modifier le mot de passe séparément
+    public Employe updatePassword(Long id, String newPassword) {
+        Employe employe = employeRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Employé introuvable"));
+        employe.setPassword(passwordEncoder.encode(newPassword));
         return employeRepository.save(employe);
     }
 
@@ -59,7 +69,7 @@ public class EmployeService {
         return employeRepository.findByDepartementCode(codeDepartement);
     }
 
-    public List<Employe> findByRole(String role) {
+    public List<Employe> findByRole(RoleEmploye role) {
         return employeRepository.findByRole(role);
     }
 
@@ -70,24 +80,9 @@ public class EmployeService {
     public List<Employe> findActiveEmployes() {
         return employeRepository.findByEnabledTrue();
     }
+
     public Employe findByUsername(String username) {
         return employeRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("Employé non trouvé"));
-    }
-
-    // 🔹 Optionnel : créer automatiquement l'admin au démarrage
-    public void initAdmin(Departement departement) {
-        if (!existsByEmail("admin@gmail.com")) {
-            Employe admin = new Employe();
-            admin.setMatricule("ADM001");
-            admin.setNom("Administrateur");
-            admin.setEmail("admin@gmail.com");
-            admin.setPassword("admin123"); // sera encodé automatiquement
-            admin.setPoste(tn.iit.entity.PosteEmploye.DIRECTEUR);
-            admin.setRole(tn.iit.entity.RoleEmploye.ADMIN);
-            admin.setDepartement(departement);
-            admin.setEnabled(true);
-            save(admin);
-        }
+            .orElseThrow(() -> new RuntimeException("Employé non trouvé"));
     }
 }

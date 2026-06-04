@@ -15,26 +15,22 @@ public class CourrierEntrantDTO {
     @NotNull(message = "La date de réception est obligatoire")
     private LocalDate dateReception;
 
-    private LocalDate dateSaisie;
-
+    private LocalDate dateSaisie;      // lecture uniquement, jamais envoyé par le client
     private String typeDocument;
     private String reference;
     private String nature;
-    private String expediteur;
 
-    // ENUMS → en String
+    // Enums en String
     private String modeReception;
-    private String statut;   // NOUVEAU, EN_COURS, TRAITE...
-    private String etat;     // ACTIVE, ARCHIVE, SUPPRIME
+    private String statut;
+    private String etat;
     private String priorite;
 
-    private String detailsLivraison;
+    private LocalDateTime dateArchivage; // lecture uniquement
 
-    private Long tiersId;
-    private String nomTiers;
+    // Expéditeur externe (Tiers)
+    private Long expediteurId;          // envoyé par le client pour créer/modifier
+    private String nomExpediteur;       // retourné en lecture uniquement
 
-    private String departementDestinataireCode;
-    private String nomDepartementDestinataire;
-
-    private String createdByMatricule;
+  
 }

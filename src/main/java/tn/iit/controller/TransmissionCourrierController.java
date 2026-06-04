@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,11 @@ import tn.iit.dto.ApiResponse;
 import tn.iit.dto.TransmissionDTO;
 import tn.iit.dto.TransmissionRequest;
 import tn.iit.entity.Employe;
-import tn.iit.entity.ResultatTraitement;
+
 import tn.iit.entity.TransmissionCourrier;
 import tn.iit.mapper.TransmissionMapper;
-import tn.iit.repository.EmployeRepository;
+
+import tn.iit.service.EmployeService;
 import tn.iit.service.TransmissionCourrierService;
 
 @RestController
@@ -31,35 +33,28 @@ import tn.iit.service.TransmissionCourrierService;
 public class TransmissionCourrierController {
 
     private final TransmissionCourrierService service;
-    private final EmployeRepository employeRepo;
+    private final EmployeService employeService;
 
     // =========================
     // ENVOYER
     // =========================
+    @PreAuthorize("hasRole('RESPONSABLE')")
     @PostMapping("/envoyer")
     public ResponseEntity<ApiResponse> envoyer(
             @RequestBody TransmissionRequest request,
             Authentication auth) {
 
-        System.out.println(">>> REQUEST COMPLET : " + request);
-        System.out.println(">>> dateEcheance : " + request.getDateEcheance());
-        Employe expediteur = employeRepo.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Expéditeur introuvable"));
-
-        TransmissionCourrier saved;
-
-        // ✔ logique propre
-        if (request.getCourrierId() != null && request.getType() != null) {
-            saved = service.envoyerCourrier(request, expediteur);
-        } else {
-            saved = service.envoyerLibre(request, expediteur);
+        if (request.getCourrierId() == null || request.getType() == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("courrierId et type sont obligatoires"));
         }
 
+        
+
+        TransmissionCourrier saved = service.envoyerCourrier(request);
+
         return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Transmission envoyée",
-                        TransmissionMapper.toDTO(saved)
-                )
+                ApiResponse.success("Transmission envoyée", TransmissionMapper.toDTO(saved))
         );
     }
     // =========================
@@ -68,7 +63,7 @@ public class TransmissionCourrierController {
     @GetMapping("/recus")
     public ResponseEntity<ApiResponse> recus(Authentication auth) {
 
-        Employe user = employeRepo.findByEmail(auth.getName())
+        Employe user = employeService.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
         List<TransmissionDTO> data = service.getRecus(user.getId())
@@ -81,24 +76,7 @@ public class TransmissionCourrierController {
         );
     }
 
-    // =========================
-    // ENVOYÉS
-    // =========================
-    @GetMapping("/envoyes")
-    public ResponseEntity<ApiResponse> envoyes(Authentication auth) {
-
-        Employe user = employeRepo.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-        List<TransmissionDTO> data = service.getEnvoyes(user.getId())
-                .stream()
-                .map(TransmissionMapper::toDTO)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(
-                ApiResponse.success("Liste des transmissions envoyées", data)
-        );
-    }
+   
 
     // =========================
     // MARQUER LU

@@ -1,44 +1,74 @@
 package tn.iit.service;
 
-import tn.iit.entity.Departement;
-import tn.iit.repository.DepartementRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import tn.iit.dto.DepartementDTO;
+import tn.iit.entity.Departement;
+import tn.iit.entity.Employe;
+import tn.iit.mapper.DepartementMapper;
+import tn.iit.repository.DepartementRepository;
+import tn.iit.repository.EmployeRepository;
 
 @Service
 @RequiredArgsConstructor
 public class DepartementService {
-    
+
     private final DepartementRepository departementRepository;
-    
-    public List<Departement> findAll() {
-        return departementRepository.findAll();
+    private final EmployeRepository employeRepository;
+    private final DepartementMapper departementMapper;
+
+    public List<DepartementDTO> findAll() {
+        return departementRepository.findAll()
+                .stream()
+                .map(departementMapper::toDTO)
+                .collect(Collectors.toList());
     }
-    
-    public Optional<Departement> findById(String code) {
-        return departementRepository.findById(code);
+
+    public DepartementDTO findById(String code) {
+        return departementRepository.findById(code)
+                .map(departementMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Département introuvable"));
     }
-    
-    public Departement save(Departement departement) {
-        return departementRepository.save(departement);
+
+    public DepartementDTO save(DepartementDTO dto) {
+
+        Employe chef = null;
+
+        if (dto.getChefDepartementId() != null) {
+            chef = employeRepository.findById(dto.getChefDepartementId())
+                    .orElseThrow(() -> new RuntimeException("Chef introuvable"));
+        }
+
+        Departement departement = departementMapper.toEntity(dto, chef);
+
+        Departement saved = departementRepository.save(departement);
+
+        return departementMapper.toDTO(saved);
     }
-    
+
     public void deleteById(String code) {
         departementRepository.deleteById(code);
     }
-    
+
     public boolean existsByCode(String code) {
-        return departementRepository.existsByCode(code);
+        return departementRepository.existsById(code);
     }
-    
-    public List<Departement> findByNomContaining(String nom) {
-        return departementRepository.findByNomContainingIgnoreCase(nom);
+
+    public List<DepartementDTO> findByNomContaining(String nom) {
+        return departementRepository.findByNomContainingIgnoreCase(nom)
+                .stream()
+                .map(departementMapper::toDTO)
+                .collect(Collectors.toList());
     }
-    
-    public List<Departement> findByChefDepartement(String chefDepartement) {
-        return departementRepository.findByChefDepartement(chefDepartement);
+
+    public List<DepartementDTO> findByChefDepartement(Long chefId) {
+        return departementRepository.findByChefDepartementId(chefId)
+                .stream()
+                .map(departementMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

@@ -1,6 +1,8 @@
 package tn.iit.repository;
 
 import tn.iit.entity.Employe;
+import tn.iit.entity.RoleEmploye;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +16,7 @@ public interface EmployeRepository extends JpaRepository<Employe, Long> {
     boolean existsByEmail(String email);
     boolean existsByMatricule(String matricule);
     List<Employe> findByDepartementCode(String codeDepartement);
-    List<Employe> findByRole(String role);
+    List<Employe> findByRole(RoleEmploye role);
     List<Employe> findByEnabledTrue();
     Optional<Employe> findByEmailAndEnabledTrue(String email);
     List<Employe> findByNomContainingIgnoreCase(String nom);

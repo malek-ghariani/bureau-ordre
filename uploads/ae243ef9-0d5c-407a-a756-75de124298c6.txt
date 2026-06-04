@@ -1,0 +1,46 @@
+Cas d’utilisation: 
+ 
+
+S’identifier(Authentification) 
+
+ 
+
+Objectif: 
+
+Permettre à un utilisateur d’accéder au système avec un compte valide. 
+
+ 
+
+Acteurs: 
+
+Responsable de bureau d’ordre, Employé, Admin. 
+
+ 
+
+Préconditions: 
+
+L'utilisateur doit disposer d'un compte actif. 
+
+Scénario nominal 
+
+L'utilisateur ouvre l'application. 
+
+Le système affiche l'écran de connexion. 
+
+L'utilisateur saisit son identifiant et mot de passe. 
+
+Le système vérifie les informations. 
+
+L'utilisateur accède à son espace dédié. 
+
+Scénario alternatif. 
+
+
+
+Marqué comme fait
+Terminé
+Terminé et planifier le prochain
+A refaire
+
+
+.collect(Collectors.toList())

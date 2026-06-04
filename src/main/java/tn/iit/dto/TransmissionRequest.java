@@ -15,5 +15,5 @@ public class TransmissionRequest {
     private String message;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dateEcheance;
-    private List<Long> piecesJointesIds;
+    
 }

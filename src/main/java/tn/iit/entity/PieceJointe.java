@@ -45,15 +45,6 @@ public class PieceJointe {
     @JsonIgnore
     private CourrierSortant courrierSortant;
     
-    @ManyToOne
-    @JoinColumn(name = "planification_id", nullable = true)
-    @JsonIgnore // ✅ ajouter
-    private Planification planification;
-
-    @ManyToOne
-    @JoinColumn(name = "uploaded_by")
-    private Employe uploadedBy;
-
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 

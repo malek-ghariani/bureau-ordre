@@ -10,13 +10,12 @@ import tn.iit.dto.TransmissionRequest;
 import tn.iit.entity.CourrierEntrant;
 import tn.iit.entity.CourrierSortant;
 import tn.iit.entity.Employe;
-
+import tn.iit.entity.StatutCourrier;
 import tn.iit.entity.TransmissionCourrier;
 import tn.iit.repository.CourrierEntrantRepository;
 import tn.iit.repository.CourrierSortantRepository;
 import tn.iit.repository.EmployeRepository;
 import tn.iit.repository.TransmissionCourrierRepository;
-import tn.iit.repository.PieceJointeRepository;
 @Service
 @RequiredArgsConstructor
 public class TransmissionCourrierService {
@@ -31,7 +30,7 @@ public class TransmissionCourrierService {
     // =========================
     // ENVOYER COURRIER
     // =========================
-    public TransmissionCourrier envoyerCourrier(TransmissionRequest request, Employe expediteur) {
+    public TransmissionCourrier envoyerCourrier(TransmissionRequest request) {
 
         if (request.getType() == null) {
             throw new RuntimeException("Le type de courrier est obligatoire");
@@ -57,9 +56,7 @@ public class TransmissionCourrierService {
             default -> throw new RuntimeException("Type de courrier invalide : " + request.getType());
         }
 
-        // -------- EXPEDITEUR & DESTINATAIRE --------
-        t.setExpediteur(expediteur);
-
+     
         Employe destinataire = employeRepo.findById(request.getDestinataireId())
                 .orElseThrow(() -> new RuntimeException("Destinataire introuvable"));
 
@@ -72,46 +69,38 @@ public class TransmissionCourrierService {
         // dateEnvoi gérée automatiquement par @PrePersist
 
         TransmissionCourrier saved = repo.save(t);
+     // après saved = repo.save(t);
+        if (t.getCourrierEntrant() != null) {
+            CourrierEntrant ce = t.getCourrierEntrant();
+            ce.setStatut(StatutCourrier.EN_COURS);
+            ceRepo.save(ce);
+        }
+        if (t.getCourrierSortant() != null) {
+            CourrierSortant cs = t.getCourrierSortant();
+            cs.setStatut(StatutCourrier.EN_COURS);
+            csRepo.save(cs);
+        }
 
         // ✔ créer planification automatiquement
-        planificationService.creerDepuisTransmission(saved, request.getDateEcheance());
+        planificationService.creerDepuisTransmission(
+                saved.getId(),
+                request.getDateEcheance()
+        );
 
         return saved;
     }
     
-    public TransmissionCourrier envoyerLibre(TransmissionRequest request, Employe expediteur) {
 
-        TransmissionCourrier t = new TransmissionCourrier();
-
-        t.setExpediteur(expediteur);
-
-        Employe destinataire = employeRepo.findById(request.getDestinataireId())
-                .orElseThrow(() -> new RuntimeException("Destinataire introuvable"));
-
-        t.setDestinataire(destinataire);
-
-        t.setMessage(request.getMessage());
-
-       
-
-        TransmissionCourrier saved = repo.save(t);
-
-        planificationService.creerDepuisTransmission(saved, request.getDateEcheance());
-
-        return saved;
-    }
 
 
     // =========================
     // REÇUS / ENVOYÉS
     // =========================
     public List<TransmissionCourrier> getRecus(Long destinataireId) {
-        return repo.findByDestinataireId(destinataireId);
+        return repo.findByDestinataire_Id(destinataireId);
     }
 
-    public List<TransmissionCourrier> getEnvoyes(Long expediteurId) {
-        return repo.findByExpediteurId(expediteurId);
-    }
+   
 
     // =========================
     // MARQUER COMME LU

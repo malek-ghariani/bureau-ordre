@@ -12,6 +12,6 @@ import tn.iit.entity.ResultatTraitement;
 @AllArgsConstructor
 public class ResponsePlanificationDTO {
 	private ResultatTraitement resultat;
-    private String message;
+    private String commentaireResultat;
 
 }

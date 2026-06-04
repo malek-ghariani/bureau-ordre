@@ -1,23 +1,20 @@
 package tn.iit.repository;
 
-import tn.iit.entity.Compteur;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import tn.iit.entity.Compteur;
+
+
 
 @Repository
-public interface CompteurRepository extends JpaRepository<Compteur, Long> {
-    Optional<Compteur> findByPrefixe(String prefixe);
-    boolean existsByPrefixe(String prefixe);
-    
+public interface CompteurRepository extends JpaRepository<Compteur, String> { // String car prefixe est l'ID
+
     @Modifying
+    @Transactional 
     @Query("UPDATE Compteur c SET c.valeurActuelle = c.valeurActuelle + 1 WHERE c.prefixe = :prefixe")
     void incrementValeurActuelle(String prefixe);
-    
-    @Modifying
-    @Query("UPDATE Compteur c SET c.anneeCourante = :annee, c.valeurActuelle = 1 WHERE c.prefixe = :prefixe")
-    void resetCompteurForNewYear(String prefixe, Integer annee);
 }

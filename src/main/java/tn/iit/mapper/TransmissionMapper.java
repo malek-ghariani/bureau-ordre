@@ -1,15 +1,11 @@
 package tn.iit.mapper;
-
-
-
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-
+import tn.iit.dto.PieceJointeDTO;
 import tn.iit.dto.TransmissionDTO;
-
 import tn.iit.entity.TransmissionCourrier;
-
 @Component
 public class TransmissionMapper {
 
@@ -40,9 +36,7 @@ public class TransmissionMapper {
         // =========================
         // 👤 EXPEDITEUR / DESTINATAIRE
         // =========================
-        dto.setExpediteurId(
-                t.getExpediteur() != null ? t.getExpediteur().getId() : null
-        );
+     
 
         dto.setDestinataireId(
                 t.getDestinataire() != null ? t.getDestinataire().getId() : null
@@ -54,9 +48,7 @@ public class TransmissionMapper {
         dto.setDateEnvoi(t.getDateEnvoi());
         dto.setDateLecture(t.getDateLecture());
 
-        // =========================
-        // 📎 PIECES JOINTES
-        // =========================
+    
         
 
         return dto;

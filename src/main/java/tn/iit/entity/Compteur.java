@@ -2,34 +2,21 @@ package tn.iit.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
+
 
 @Entity
 @Table(name = "compteur")
 @Data
 public class Compteur {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(unique = true, nullable = false, length = 100)
-    private String prefixe;
-    
+    private String prefixe; 
+
     @Column(name = "valeur_actuelle", nullable = false)
-    private Integer valeurActuelle = 1;
-    
-    private String description;
-    private String format;
-    
-    @Column(name = "annee_courante")
-    private Integer anneeCourante = java.time.LocalDate.now().getYear();
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-    
-    @PrePersist
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    private Integer valeurActuelle=0 ;
+
+    @Column(name = "annee_courante", nullable = false)
+    private Integer anneeCourante = LocalDate.now().getYear();
 }

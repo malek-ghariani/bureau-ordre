@@ -1,0 +1,18 @@
+ envoyerCourrier(event: any) {
+  if (!this.selectedDocument || !event.employeId || !event.objet || !event.message) return;
+
+  const payload = {
+    courrierId: this.selectedDocument.id!,
+    employeId: event.employeId,
+    objet: event.objet,
+    message: event.message
+  };
+
+  this.documentService.envoyerCourrier(payload).subscribe({
+    next: () => {
+      alert('Courrier envoyé !');
+      this.closeSendModal();
+    },
+    error: () => alert('Erreur lors de l\'envoi du courrier')
+  });
+}

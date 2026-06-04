@@ -7,6 +7,7 @@ public enum PosteEmploye {
     RESPONSABLE,
     TECHNICIEN,  
     COMPTABLE,
-    RH
+    RH,
+    ADMINISTRATEUR
     
 }

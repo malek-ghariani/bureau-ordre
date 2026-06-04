@@ -1,9 +1,10 @@
 package tn.iit.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.time.LocalDate;
 
 @Data
 public class CourrierSortantDTO {
@@ -14,27 +15,24 @@ public class CourrierSortantDTO {
     @NotNull(message = "La date d'émission est obligatoire")
     private LocalDate dateEmission;
 
-    private LocalDate dateSaisie;
-
+    private LocalDate dateSaisie;        // lecture uniquement
     private String typeDocument;
     private String reference;
     private String nature;
-    private String destinataire;
 
-    // ENUMS
+    // Enums en String
     private String modeExpedition;
     private String statut;
     private String etat;
     private String priorite;
 
-    private String adresseLivraison;
-    private String emailDestinataire;
+    private LocalDateTime dateArchivage;  // lecture uniquement
+    private LocalDate dateExpedition; // lecture uniquement
 
-    private Long tiersId;
-    private String nomTiers;
+    // Destinataire externe (Tiers)
+    private Long destinataireId;          // envoyé par le client
+    private String nomDestinataire;       // lecture uniquement
+  
 
-    private String departementEmetteurCode;
-    private String nomDepartementEmetteur;
-
-    private String createdByMatricule;
+   
 }

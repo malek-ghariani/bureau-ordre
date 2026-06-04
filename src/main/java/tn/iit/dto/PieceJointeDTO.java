@@ -1,8 +1,11 @@
 package tn.iit.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tn.iit.entity.PieceJointe;
-
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class PieceJointeDTO {
     private Long id;

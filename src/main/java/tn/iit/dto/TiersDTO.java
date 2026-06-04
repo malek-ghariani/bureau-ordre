@@ -13,10 +13,7 @@ public class TiersDTO {
     private String telephone;
     private String adresse;
     private String email;
-    private String fax;
     private String type;
     private String nomContact;
-    private String ice;
-    private String ifisc;
-    private String rc;
+  
 }

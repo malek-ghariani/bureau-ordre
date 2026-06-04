@@ -1,12 +1,8 @@
 package tn.iit.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,14 +10,21 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+
+
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Table(name = "planification")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Planification {
@@ -30,50 +33,51 @@ public class Planification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "destinataire_id")
-    private Employe destinataire;
+   
+
+    @Column(name = "date_echeance", nullable = false)
+    private LocalDateTime dateEcheance;
 
     @Enumerated(EnumType.STRING)
-    private StatutPlanification statut;
-    
+    @Column(nullable = false)
+    private StatutPlanification statut = StatutPlanification.EN_ATTENTE;
+
     @Enumerated(EnumType.STRING)
     private ResultatTraitement resultat;
-    // 👇 message libre
-    private String message;
 
-    private LocalDateTime dateEcheance;
+    private String commentaireResultat;  // réponse de l'employé
+
+    // Toujours liée à une transmission
+    @OneToOne
+    @JoinColumn(name = "transmission_id", nullable = false)
+    private TransmissionCourrier transmission;
 
    
 
-    // =========================
-    // 🔥 SOURCE DE LA PLANIFICATION
-    // =========================
-    // COURRIER ou MANUEL
-    @Enumerated(EnumType.STRING)
-    private TypeSourcePlanification typeSource;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    // =========================
-    // COURRIER OPTIONNEL
-    // =========================
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "courrier_entrant_id")
-    private CourrierEntrant courrierEntrant;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "courrier_sortant_id")
-    private CourrierSortant courrierSortant;
-    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Planification)) return false;
+        Planification that = (Planification) o;
+        return id != null && id.equals(that.id);
+    }
 
-    // =========================
-    // PIÈCES JOINTES
-    // =========================
-    @OneToMany(mappedBy = "planification", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PieceJointe> piecesJointes = new ArrayList<>();
-    
-    @ManyToOne
-    @JoinColumn(name = "transmission_id")
-    private TransmissionCourrier transmission;
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

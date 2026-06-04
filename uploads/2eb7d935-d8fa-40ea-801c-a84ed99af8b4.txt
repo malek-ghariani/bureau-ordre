@@ -1,0 +1,27 @@
+http://moodle.northeurope.cloudapp.azure.com/moodle/course/index.php?categoryid=13
+login:vm
+pswd:test
+
+
+
+grammarly.com
+BPMN(diapo 22)
+Exercice de modélisation-Forming
+
+c'est la phase de connaissance et avoir une idée et des jugement de l'equipe
+
+-Storming
+
+c'est la phase des conflits et les confrontations entre les membres de l'equipe
+
+-Norming
+
+c'est  la phase de  surmonter les conflits et les malentendus 
+
+-Performing
+
+c'est la phase d'evolution et de s'installer bien pour que chaque membre de l'équipe faire son mieux et assurer le bon avancement de travail
+
+-Adjourning
+
+c'est la dernier phase. C'est la phase de recompense 

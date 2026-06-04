@@ -19,8 +19,9 @@ public class Departement {
     @Column(nullable = false)
     private String nom;
     
-    @Column(name = "chef_departement")
-    private String chefDepartement;
+    @OneToOne
+    @JoinColumn(name = "chef_departement", unique = true)
+    private Employe chefDepartement;
     
     private String email;
     private String telephone;
@@ -35,11 +36,7 @@ public class Departement {
     @OneToMany(mappedBy = "departement")
     private List<Employe> employes = new ArrayList<>();
     
-    @OneToMany(mappedBy = "departementDestinataire")
-    private List<CourrierEntrant> courriersEntrants = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "departementEmetteur")
-    private List<CourrierSortant> courriersSortants = new ArrayList<>();
+
     
     @PrePersist
     protected void onCreate() {

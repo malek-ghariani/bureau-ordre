@@ -1,16 +1,26 @@
 package tn.iit.controller;
 
-import tn.iit.dto.ApiResponse;
-import tn.iit.dto.TiersDTO;
-import tn.iit.entity.Tiers;
-import tn.iit.service.TiersService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import tn.iit.dto.ApiResponse;
+import tn.iit.dto.TiersDTO;
+import tn.iit.mapper.TiersMapper;
+import tn.iit.entity.Tiers;
+import tn.iit.service.TiersService;
 
 @RestController
 @RequestMapping("/api/tiers")
@@ -18,12 +28,13 @@ import java.util.stream.Collectors;
 public class TiersController {
     
     private final TiersService tiersService;
+    private final TiersMapper tiersMapper;
     
     @GetMapping
     public ResponseEntity<ApiResponse> getAllTiers() {
         List<TiersDTO> tiers = tiersService.findAll()
                 .stream()
-                .map(this::toDTO)
+                .map(tiersMapper::toDTO)  // ← remplace this::toDTO
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success("Liste des tiers récupérée", tiers));
     }
@@ -31,27 +42,28 @@ public class TiersController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getTiersById(@PathVariable Long id) {
         return tiersService.findById(id)
-                .map(tiers -> ResponseEntity.ok(ApiResponse.success("Tiers trouvé", toDTO(tiers))))
+                .map(tiers -> ResponseEntity.ok(ApiResponse.success("Tiers trouvé", tiersMapper.toDTO(tiers))))
                 .orElse(ResponseEntity.ok(ApiResponse.error("Tiers non trouvé")));
     }
     
     @PostMapping
     public ResponseEntity<ApiResponse> createTiers(@Valid @RequestBody TiersDTO tiersDTO) {
-        Tiers tiers = toEntity(tiersDTO);
+        Tiers tiers = tiersMapper.toEntity(tiersDTO);
         Tiers savedTiers = tiersService.save(tiers);
-        return ResponseEntity.ok(ApiResponse.success("Tiers créé avec succès", toDTO(savedTiers)));
+        return ResponseEntity.ok(ApiResponse.success("Tiers créé avec succès", tiersMapper.toDTO(savedTiers)));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateTiers(@PathVariable Long id, @Valid @RequestBody TiersDTO tiersDTO) {
+    public ResponseEntity<ApiResponse> updateTiers(
+            @PathVariable Long id, 
+            @Valid @RequestBody TiersDTO tiersDTO) {
         if (!tiersService.findById(id).isPresent()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Tiers non trouvé"));
         }
-        
         tiersDTO.setId(id);
-        Tiers tiers = toEntity(tiersDTO);
+        Tiers tiers = tiersMapper.toEntity(tiersDTO);
         Tiers updatedTiers = tiersService.save(tiers);
-        return ResponseEntity.ok(ApiResponse.success("Tiers modifié avec succès", toDTO(updatedTiers)));
+        return ResponseEntity.ok(ApiResponse.success("Tiers modifié avec succès", tiersMapper.toDTO(updatedTiers)));
     }
     
     @DeleteMapping("/{id}")
@@ -59,7 +71,6 @@ public class TiersController {
         if (!tiersService.findById(id).isPresent()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Tiers non trouvé"));
         }
-        
         tiersService.deleteById(id);
         return ResponseEntity.ok(ApiResponse.success("Tiers supprimé avec succès"));
     }
@@ -68,7 +79,7 @@ public class TiersController {
     public ResponseEntity<ApiResponse> searchTiers(@RequestParam String keyword) {
         List<TiersDTO> tiers = tiersService.searchTiers(keyword)
                 .stream()
-                .map(this::toDTO)
+                .map(tiersMapper::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success("Résultats de recherche", tiers));
     }
@@ -77,36 +88,10 @@ public class TiersController {
     public ResponseEntity<ApiResponse> getTiersByType(@PathVariable String type) {
         List<TiersDTO> tiers = tiersService.findByType(type)
                 .stream()
-                .map(this::toDTO)
+                .map(tiersMapper::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success("Tiers par type récupérés", tiers));
     }
     
-    private TiersDTO toDTO(Tiers tiers) {
-        TiersDTO dto = new TiersDTO();
-        dto.setId(tiers.getId());
-        dto.setNom(tiers.getNom());
-        dto.setTelephone(tiers.getTelephone());
-        dto.setAdresse(tiers.getAdresse());
-        dto.setEmail(tiers.getEmail());
-        
-        dto.setType(tiers.getType());
-        dto.setNomContact(tiers.getNomContact());
-       
-        return dto;
-    }
-    
-    private Tiers toEntity(TiersDTO dto) {
-        Tiers tiers = new Tiers();
-        tiers.setId(dto.getId());
-        tiers.setNom(dto.getNom());
-        tiers.setTelephone(dto.getTelephone());
-        tiers.setAdresse(dto.getAdresse());
-        tiers.setEmail(dto.getEmail());
-      
-        tiers.setType(dto.getType());
-        tiers.setNomContact(dto.getNomContact());
-       
-        return tiers;
-    }
+  
 }
