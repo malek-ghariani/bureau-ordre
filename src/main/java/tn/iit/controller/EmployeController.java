@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -100,5 +101,20 @@ public class EmployeController {
             employeService.deleteById(id);
             return ResponseEntity.ok(ApiResponse.success("Employé supprimé avec succès"));
         }).orElse(ResponseEntity.badRequest().body(ApiResponse.error("Employé non trouvé")));
+    }
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<ApiResponse> updatePassword(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String newPassword = body.get("newPassword");
+
+        if (newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest()
+                .body(ApiResponse.error("Le nouveau mot de passe est obligatoire"));
+        }
+
+        employeService.updatePassword(id, newPassword);
+        return ResponseEntity.ok(ApiResponse.success("Mot de passe modifié avec succès"));
     }
 }

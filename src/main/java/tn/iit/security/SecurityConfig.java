@@ -33,12 +33,10 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // ✅ pas de
-																												// session
-																												// → JWT
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
 				).authorizeHttpRequests(auth -> auth
 
-						// ✅ Login public
+						
 						.requestMatchers("/api/auth/**").permitAll().requestMatchers("/error").permitAll()
 
 						// ADMIN — gestion des employés et départements
@@ -51,6 +49,7 @@ public class SecurityConfig {
 
 						// Départements — ADMIN seulement
 						.requestMatchers("/api/departements/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PATCH, "/api/employes/*/password").hasRole("ADMIN")
 
 						// ✅ COURRIERS
 						// COURRIERS ENTRANTS (gérés uniquement par RESPONSABLE)

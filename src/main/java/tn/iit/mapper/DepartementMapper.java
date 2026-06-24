@@ -18,6 +18,7 @@ public class DepartementMapper {
 
         if (departement.getChefDepartement() != null) {
             dto.setChefDepartementId(departement.getChefDepartement().getId());
+            dto.setChefDepartementNom(departement.getChefDepartement().getNom());
         }
 
         dto.setEmail(departement.getEmail());

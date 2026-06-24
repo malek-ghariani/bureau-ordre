@@ -15,6 +15,7 @@ import tn.iit.entity.CourrierSortant;
 import tn.iit.entity.EtatCourrier;
 import tn.iit.entity.ModeExpedition;
 import tn.iit.entity.ModeReception;
+import tn.iit.entity.Planification;
 import tn.iit.entity.Priorite;
 import tn.iit.entity.StatutCourrier;
 import tn.iit.entity.Tiers;
@@ -97,7 +98,6 @@ public class CourrierMapper {
 	public ArchiveEntrantDTO toArchiveEntrantDTO(CourrierEntrant entity) {
 	    if (entity == null)
 	        return null;
-
 	    ArchiveEntrantDTO dto = new ArchiveEntrantDTO();
 	    dto.setId(entity.getId());
 	    dto.setNumeroOrdre(entity.getNumeroOrdre());
@@ -106,15 +106,12 @@ public class CourrierMapper {
 	    dto.setDateArchivage(entity.getDateArchivage());
 	    dto.setNature(entity.getNature());
 
-	    // Priorité enum → String
 	    if (entity.getPriorite() != null)
 	        dto.setPriorite(entity.getPriorite().name());
 
-	    // Expéditeur externe
 	    if (entity.getExpediteur() != null)
 	        dto.setExpediteur(entity.getExpediteur().getNom());
 
-	    // 🔥 Transmissions (avec tes classes réelles)
 	    if (entity.getTransmissions() != null) {
 	        dto.setTransmissions(
 	            entity.getTransmissions().stream()
@@ -123,26 +120,35 @@ public class CourrierMapper {
 	                    tDto.setId(t.getId());
 	                    tDto.setMessage(t.getMessage());
 	                    tDto.setDateEnvoi(t.getDateEnvoi());
-	                    tDto.setDestinataireNom(t.getDestinataire().getNom());
+
+	                    // protection null sur le destinataire
+	                    if (t.getDestinataire() != null)
+	                        tDto.setDestinataireNom(t.getDestinataire().getNom());
+
+	                    // resultat + reponseEmploye viennent de la Planification liée
+	                    if (t.getPlanification() != null) {
+	                        Planification p = t.getPlanification();
+	                        if (p.getResultat() != null)
+	                            tDto.setResultat(p.getResultat().name());
+	                        tDto.setReponseEmploye(p.getCommentaireResultat());
+	                    }
+
 	                    return tDto;
 	                })
 	                .collect(Collectors.toList())
 	        );
-	    
 
-	    // pièces jointes
-	    dto.setPiecesJointes(
-	    	    entity.getPiecesJointes().stream()
-	    	        .map(p -> {
-	    	            PieceJointeDTO pDto = new PieceJointeDTO();
-	    	            pDto.setId(p.getId());
-	    	            pDto.setNomFichier(p.getNomFichier());
-	    	            return pDto;
-	    	        })
-	    	        .collect(Collectors.toList())
-	    	);
+	        dto.setPiecesJointes(
+	            entity.getPiecesJointes().stream()
+	                .map(p -> {
+	                    PieceJointeDTO pDto = new PieceJointeDTO();
+	                    pDto.setId(p.getId());
+	                    pDto.setNomFichier(p.getNomFichier());
+	                    return pDto;
+	                })
+	                .collect(Collectors.toList())
+	        );
 	    }
-
 	    return dto;
 	}
 
@@ -223,9 +229,7 @@ public class CourrierMapper {
 	public ArchiveSortantDTO toArchiveSortantDTO(CourrierSortant entity) {
 	    if (entity == null)
 	        return null;
-
 	    ArchiveSortantDTO dto = new ArchiveSortantDTO();
-
 	    dto.setId(entity.getId());
 	    dto.setNumeroOrdre(entity.getNumeroOrdre());
 	    dto.setReference(entity.getReference());
@@ -234,20 +238,17 @@ public class CourrierMapper {
 	    dto.setDateExpedition(entity.getDateExpedition());
 	    dto.setDateArchivage(entity.getDateArchivage());
 
-	    // enums
 	    if (entity.getPriorite() != null)
 	        dto.setPriorite(entity.getPriorite().name());
-
 	    if (entity.getStatut() != null)
 	        dto.setStatut(entity.getStatut().name());
-
 	    if (entity.getEtat() != null)
 	        dto.setEtat(entity.getEtat().name());
 
-	    // destinataire (tiers)
 	    if (entity.getDestinataire() != null) {
 	        dto.setDestinataire(entity.getDestinataire().getNom());
 	    }
+
 	    if (entity.getTransmissions() != null) {
 	        dto.setTransmissions(
 	            entity.getTransmissions().stream()
@@ -256,7 +257,17 @@ public class CourrierMapper {
 	                    tDto.setId(t.getId());
 	                    tDto.setMessage(t.getMessage());
 	                    tDto.setDateEnvoi(t.getDateEnvoi());
-	                    tDto.setDestinataireNom(t.getDestinataire().getNom());
+
+	                    if (t.getDestinataire() != null)
+	                        tDto.setDestinataireNom(t.getDestinataire().getNom());
+
+	                    if (t.getPlanification() != null) {
+	                        Planification p = t.getPlanification();
+	                        if (p.getResultat() != null)
+	                            tDto.setResultat(p.getResultat().name());
+	                        tDto.setReponseEmploye(p.getCommentaireResultat());
+	                    }
+
 	                    return tDto;
 	                })
 	                .collect(Collectors.toList())
@@ -274,7 +285,6 @@ public class CourrierMapper {
 	                .collect(Collectors.toList())
 	        );
 	    }
-
 	    return dto;
 	}
   }

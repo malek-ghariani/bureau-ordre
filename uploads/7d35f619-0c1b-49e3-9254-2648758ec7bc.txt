@@ -1,0 +1,52 @@
+apparence des tableaux
+bordereau
+resultat (archivage)
+compte active/inactive (admin)
+nom chef departement (gestion departement)
+"Nous avons séparé la transmission de la planification selon le principe de 
+séparation des responsabilités. La transmission représente l'acte d'envoi du courrier, 
+tandis que la planification représente le cycle de vie du traitement par l'employé. 
+Cette séparation permet de tracer indépendamment
+ l'historique des envois et l'historique des traitements."
+
+
+Cependant, dans ton application actuelle, ce n'est pas forcément un problème.
+
+D'après ce que tu m'as décrit :
+
+Le responsable enregistre le courrier.
+Il l'affecte à un employé.
+Une planification est créée.
+L'employé traite la planification.
+L'employé saisit un compte-rendu/résultat.
+Le responsable consulte cette réponse.
+
+C'est déjà un cycle complet de traitement.
+
+Tu peux donc expliquer devant le jury :
+
+« Dans cette première version de l'application, l'employé transmet son résultat de traitement
+ sous forme de compte-rendu associé à la planification. Le responsable peut ensuite
+ consulter cette réponse. L'envoi de documents ou de fichiers de réponse par l'employé constitue une amélioration 
+envisageable dans les perspectives d'évolution du projet. »
+
+C'est même une bonne idée d'ajouter dans les perspectives :
+
+Possibilité pour l'employé de joindre des documents de réponse.
+Transmission électronique des réponses vers le responsable.
+Validation ou rejet des réponses par le responsable.
+Workflow de traitement plus avancé.
+
+Ainsi, le jury verra que tu es consciente de cette fonctionnalité mais que
+ tu l'as laissée comme évolution future.
+
+Si le jury te demande :
+
+« Pourquoi l'employé ne peut-il pas envoyer un document ? »
+
+Tu peux répondre :
+
+« J'ai privilégié les fonctionnalités essentielles du bureau d'ordre : l'enregistrement,
+ l'affectation, le suivi et l'archivage des courriers. La transmission de documents de réponse
+ par l'employé a été identifiée comme une amélioration future afin de garder un périmètre 
+de projet réalisable dans le temps imparti. »

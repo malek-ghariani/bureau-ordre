@@ -11,6 +11,7 @@ public class TransmissionArchiveDTO {
     private LocalDateTime dateEnvoi;
     private String expediteurNom;
     private String destinataireNom;
-   
+    private String resultat;          
+    private String reponseEmploye; 
 
 }

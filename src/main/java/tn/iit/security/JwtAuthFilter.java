@@ -38,12 +38,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7); // supprimer "Bearer "
         String username = jwtService.extractUsername(token);
 
-        // ✅ Token lisible et utilisateur pas encore authentifié
+        //  Token lisible et utilisateur pas encore authentifié
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (jwtService.isTokenValid(token, userDetails)) {
-                // ✅ Authentifier l'utilisateur dans Spring Security
+                // Authentifier l'utilisateur dans Spring Security
                 UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
                         userDetails,

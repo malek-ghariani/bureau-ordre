@@ -70,7 +70,7 @@ public class CourrierEntrantController {
         );
     }
 
-    // 5. DELETE — soft delete simple
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
 

@@ -13,6 +13,7 @@ public class DepartementDTO {
 
     // on stocke l'id du chef (recommandé)
     private Long chefDepartementId;
+    private String chefDepartementNom;
 
     private String email;
     private String telephone;

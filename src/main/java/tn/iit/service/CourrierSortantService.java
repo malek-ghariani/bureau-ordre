@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import tn.iit.dto.ArchiveSortantDTO;
-import tn.iit.dto.CourrierEntrantDTO;
+
 import tn.iit.dto.CourrierSortantDTO;
-import tn.iit.entity.CourrierEntrant;
+
 import tn.iit.entity.CourrierSortant;
 
 import tn.iit.entity.EtatCourrier;
