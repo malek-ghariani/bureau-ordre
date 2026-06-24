@@ -98,4 +98,15 @@ telechargerPieceJointe(id: number, nom: string) {
   // ne pas null selectedPlanification ici
   this.showReponseModal = true;
 }
+filtreStatut = 'EN_ATTENTE'; // par défaut
+
+get planificationsFiltrees() {
+  if (this.filtreStatut === 'TOUS') return this.planifications;
+  return this.planifications.filter(p => p.statut === this.filtreStatut);
+}
+
+isEcheanceDepassee(dateEcheance: string): boolean {
+  if (!dateEcheance) return false;
+  return new Date(dateEcheance) < new Date();
+}
 }

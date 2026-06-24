@@ -49,6 +49,8 @@ export class ArchivesComponent implements OnInit {
   ouvrirDetails(archive: any) {
     this.selectedArchive = archive;
     this.showDetailsModal = true;
+
+    console.log('Transmissions reçues :', JSON.stringify(this.selectedArchive.transmissions, null, 2));
   }
 
   fermerDetails() {

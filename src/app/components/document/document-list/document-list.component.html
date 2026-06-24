@@ -10,8 +10,33 @@
 
 <div class="mb-3" *ngIf="role === 'RESPONSABLE'">
   <button class="btn btn-success" (click)="createDocument()">
-    <i class="fas fa-plus"></i> Nouveau Document
+    <i class="fas fa-plus"></i> Nouveau Courrier
   </button>
+</div>
+<!-- FILTRES -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <input type="text" class="form-control"
+               placeholder="Référence..."
+               [(ngModel)]="filtreReference">
+      </div>
+      <div class="col-md-3">
+        <input type="date" class="form-control"
+               [(ngModel)]="filtreDateDebut">
+      </div>
+      <div class="col-md-3">
+        <input type="date" class="form-control"
+               [(ngModel)]="filtreDateFin">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-secondary w-100" (click)="resetFiltres()">
+          🔄 Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="table-responsive">
@@ -29,7 +54,7 @@
   </tr>
 </thead>
     <tbody>
-      <tr *ngFor="let doc of documents">
+      <tr *ngFor="let doc of documentsFiltres">
 
   <td>{{ doc.numeroOrdre }}</td>
   <td>{{ doc.reference }}</td>

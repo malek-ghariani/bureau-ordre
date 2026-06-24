@@ -1,14 +1,39 @@
 <div class="container">
 
   <h2>Liste des planifications</h2>
+<!-- FILTRES -->
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <input type="text" class="form-control"
+               placeholder="Filtrer par employé..."
+               [(ngModel)]="filtreNom">
+      </div>
+      <div class="col-md-4">
+        <select class="form-control" [(ngModel)]="filtreStatut">
+          <option value="">Tous les états</option>
+          <option value="EN_ATTENTE">En attente</option>
+          <option value="TRAITE">Répondu</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-secondary w-100" (click)="resetFiltres()">
+          🔄 Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
   
 
-  <table class="table table-bordered table-striped" *ngIf="planifications.length > 0">
+  <table class="table table-bordered table-striped" *ngIf="planificationsFiltrees.length > 0">
 
     <thead>
       <tr>
-        <th>ID</th>
+        <th>ID Courrier</th>
+        <th>Message</th>
         <th>Envoyé à</th>
         <th>État</th>
         <th style="width:220px;">Actions</th>
@@ -16,9 +41,13 @@
     </thead>
 
     <tbody>
-      <tr *ngFor="let p of planifications">
+      <tr *ngFor="let p of planificationsFiltrees">
 
-        <td>{{ p.id }}</td>
+        <td>
+  <span *ngIf="p.courrierEntrantId">Entrant #{{ p.courrierEntrantId }}</span>
+  <span *ngIf="p.courrierSortantId">Sortant #{{ p.courrierSortantId }}</span>
+</td>
+<td>{{ p.transmissionMessage ? (p.transmissionMessage | slice:0:50) + (p.transmissionMessage.length > 50 ? '...' : '') : '-' }}</td>
 
         <!-- Destinataire -->
         <td>{{ p.destinataireNom }}</td>

@@ -6,6 +6,7 @@ import { AuthGuard } from './services/auth.guard';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { DefaultRedirectComponent } from './components/default-redirect/default-redirect.component';
 import { ListePlanificationsComponent } from './components/planification/liste-planifications/liste-planifications.component';
+import { PlanificationEmployeComponent } from './components/planification/planification-employe/planification-employe.component';
 
 const routes: Routes = [
   // 🔹 Page Login (publique)
@@ -28,6 +29,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: 'ADMIN' }
   },
+  { path: 'planifications-employe', component: PlanificationEmployeComponent },
 
   // 🔹 Module Responsable (lazy loading, rôle RESPONSABLE)
   {

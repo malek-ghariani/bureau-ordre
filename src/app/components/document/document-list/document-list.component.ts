@@ -59,4 +59,37 @@ archiver(doc: Document) {
 marquerTraite(doc: Document) {
   this.marquerTraiteEvent.emit(doc);
 }
+// Filtres
+filtreReference = '';
+filtreDateDebut = '';
+filtreDateFin   = '';
+
+get documentsFiltres() {
+  return this.documents.filter(doc => {
+    // Filtre référence
+    if (this.filtreReference &&
+        !doc.reference?.toLowerCase().includes(this.filtreReference.toLowerCase())) {
+      return false;
+    }
+
+    // La date à comparer selon le type
+    const dateStr = this.type === 'entrant' ? doc.dateReception : doc.dateEmission;
+    const date = dateStr ? new Date(dateStr) : null;
+
+    if (this.filtreDateDebut && date) {
+      if (date < new Date(this.filtreDateDebut)) return false;
+    }
+    if (this.filtreDateFin && date) {
+      if (date > new Date(this.filtreDateFin)) return false;
+    }
+
+    return true;
+  });
+}
+
+resetFiltres() {
+  this.filtreReference = '';
+  this.filtreDateDebut = '';
+  this.filtreDateFin   = '';
+}
 }

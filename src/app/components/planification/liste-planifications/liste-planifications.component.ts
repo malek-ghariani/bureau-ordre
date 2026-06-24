@@ -99,4 +99,19 @@ savePlanification(data: any) {
   };
   this.showReponseModal = true;
 }
+filtreNom = '';
+filtreStatut = '';
+
+get planificationsFiltrees() {
+  return this.planifications.filter(p => {
+    const nomOk = !this.filtreNom || 
+      p.destinataireNom?.toLowerCase().includes(this.filtreNom.toLowerCase());
+    const statutOk = !this.filtreStatut || p.statut === this.filtreStatut;
+    return nomOk && statutOk;
+  });
+}
+resetFiltres() {
+  this.filtreNom = '';
+  this.filtreStatut = '';
+}
 }
